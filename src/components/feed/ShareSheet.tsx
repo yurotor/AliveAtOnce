@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { track } from "@vercel/analytics";
 import type { Fact } from "@/lib/db";
 import { factPath, plainHeadline, SITE_URL } from "@/lib/present";
 import { CloseIcon, InstagramIcon, LinkIcon, TikTokIcon, WhatsAppIcon } from "./icons";
+import { useDialog } from "./useDialog";
 
 type Target = "whatsapp" | "tiktok" | "instagram" | "copy";
 
@@ -18,7 +19,7 @@ export function ShareSheet({ fact, onClose, onToast }: { fact: Fact; onClose: ()
   const text = plainHeadline(fact);
   const [file, setFile] = useState<File | null>(null);
   const [canShareFiles, setCanShareFiles] = useState(false);
-  const first = useRef<HTMLAnchorElement>(null);
+  const box = useDialog<HTMLDivElement>(onClose);
 
   // Fetch the story image as soon as the sheet opens, so tapping TikTok/Instagram
   // can call navigator.share() straight away (iOS requires a fresh tap).
@@ -35,13 +36,6 @@ export function ShareSheet({ fact, onClose, onToast }: { fact: Fact; onClose: ()
       .catch(() => {});
     return () => { live = false; };
   }, [fact]);
-
-  useEffect(() => {
-    first.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
 
   const log = (target: Target) => track("share", { target, bridge: fact.slug });
 
@@ -79,17 +73,17 @@ export function ShareSheet({ fact, onClose, onToast }: { fact: Fact; onClose: ()
   const row = "flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-left hover:bg-paper-2 focus-visible:bg-paper-2";
   const hint = canShareFiles ? "Share the card" : "Download the card";
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Share">
-      <button type="button" aria-label="Close" className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={onClose} />
+    <div ref={box} className="fixed inset-0 z-40 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Share">
+      <button type="button" tabIndex={-1} aria-label="Close" className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={onClose} />
       <div className="sheet-up relative w-full max-w-sm rounded-t-3xl border border-rule bg-paper p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl">
         <div className="flex items-center justify-between px-4 pb-1 pt-2">
           <h2 className="font-display text-2xl">Share</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-2 text-muted hover:text-ink">
+          <button type="button" onClick={onClose} aria-label="Close" className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full text-muted hover:text-ink">
             <CloseIcon />
           </button>
         </div>
         <a
-          ref={first}
+          data-autofocus
           className={row}
           href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`}
           target="_blank"

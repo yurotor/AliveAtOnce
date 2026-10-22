@@ -1,0 +1,589 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T11:20:00.345Z",
+  "title": "Design System: Alive At Once",
+  "extensions": {
+    "colorMeta": {
+      "midnight-ink": {
+        "role": "neutral",
+        "displayName": "Midnight Ink",
+        "canonical": "oklch(21.4% 0.039 278.2)",
+        "tonalRamp": [
+          "oklch(15% 0.024 278.2)",
+          "oklch(25% 0.039 278.2)",
+          "oklch(35% 0.039 278.2)",
+          "oklch(45% 0.039 278.2)",
+          "oklch(58% 0.039 278.2)",
+          "oklch(70% 0.039 278.2)",
+          "oklch(82% 0.039 278.2)",
+          "oklch(95% 0.024 278.2)"
+        ]
+      },
+      "midnight-raised": {
+        "role": "neutral",
+        "displayName": "Midnight Raised",
+        "canonical": "oklch(25.3% 0.045 277.2)",
+        "tonalRamp": [
+          "oklch(15% 0.027 277.2)",
+          "oklch(25% 0.045 277.2)",
+          "oklch(35% 0.045 277.2)",
+          "oklch(45% 0.045 277.2)",
+          "oklch(58% 0.045 277.2)",
+          "oklch(70% 0.045 277.2)",
+          "oklch(82% 0.045 277.2)",
+          "oklch(95% 0.027 277.2)"
+        ]
+      },
+      "moonlit-text": {
+        "role": "neutral",
+        "displayName": "Moonlit Text",
+        "canonical": "oklch(93.9% 0.012 281.1)",
+        "tonalRamp": [
+          "oklch(15% 0.007 281.1)",
+          "oklch(25% 0.012 281.1)",
+          "oklch(35% 0.012 281.1)",
+          "oklch(45% 0.012 281.1)",
+          "oklch(58% 0.012 281.1)",
+          "oklch(70% 0.012 281.1)",
+          "oklch(82% 0.012 281.1)",
+          "oklch(95% 0.007 281.1)"
+        ]
+      },
+      "dusk-muted": {
+        "role": "neutral",
+        "displayName": "Dusk Muted",
+        "canonical": "oklch(71.4% 0.033 279.6)",
+        "tonalRamp": [
+          "oklch(15% 0.020 279.6)",
+          "oklch(25% 0.033 279.6)",
+          "oklch(35% 0.033 279.6)",
+          "oklch(45% 0.033 279.6)",
+          "oklch(58% 0.033 279.6)",
+          "oklch(70% 0.033 279.6)",
+          "oklch(82% 0.033 279.6)",
+          "oklch(95% 0.020 279.6)"
+        ]
+      },
+      "night-rule": {
+        "role": "neutral",
+        "displayName": "Night Rule",
+        "canonical": "oklch(35.3% 0.059 277.8)",
+        "tonalRamp": [
+          "oklch(15% 0.036 277.8)",
+          "oklch(25% 0.059 277.8)",
+          "oklch(35% 0.059 277.8)",
+          "oklch(45% 0.059 277.8)",
+          "oklch(58% 0.059 277.8)",
+          "oklch(70% 0.059 277.8)",
+          "oklch(82% 0.059 277.8)",
+          "oklch(95% 0.036 277.8)"
+        ]
+      },
+      "portrait-ring": {
+        "role": "neutral",
+        "displayName": "Portrait Ring",
+        "canonical": "oklch(43.9% 0.058 278.7)",
+        "tonalRamp": [
+          "oklch(15% 0.035 278.7)",
+          "oklch(25% 0.058 278.7)",
+          "oklch(35% 0.058 278.7)",
+          "oklch(45% 0.058 278.7)",
+          "oklch(58% 0.058 278.7)",
+          "oklch(70% 0.058 278.7)",
+          "oklch(82% 0.058 278.7)",
+          "oklch(95% 0.035 278.7)"
+        ]
+      },
+      "lamplit-paper": {
+        "role": "neutral",
+        "displayName": "Lamplit Paper",
+        "canonical": "oklch(94.6% 0.007 124.5)",
+        "tonalRamp": [
+          "oklch(15% 0.004 124.5)",
+          "oklch(25% 0.007 124.5)",
+          "oklch(35% 0.007 124.5)",
+          "oklch(45% 0.007 124.5)",
+          "oklch(58% 0.007 124.5)",
+          "oklch(70% 0.007 124.5)",
+          "oklch(82% 0.007 124.5)",
+          "oklch(95% 0.004 124.5)"
+        ]
+      },
+      "lamplit-raised": {
+        "role": "neutral",
+        "displayName": "Lamplit Raised",
+        "canonical": "oklch(91.8% 0.010 125.7)",
+        "tonalRamp": [
+          "oklch(15% 0.006 125.7)",
+          "oklch(25% 0.010 125.7)",
+          "oklch(35% 0.010 125.7)",
+          "oklch(45% 0.010 125.7)",
+          "oklch(58% 0.010 125.7)",
+          "oklch(70% 0.010 125.7)",
+          "oklch(82% 0.010 125.7)",
+          "oklch(95% 0.006 125.7)"
+        ]
+      },
+      "indigo-ink": {
+        "role": "neutral",
+        "displayName": "Indigo Ink",
+        "canonical": "oklch(24.9% 0.053 278.7)",
+        "tonalRamp": [
+          "oklch(15% 0.032 278.7)",
+          "oklch(25% 0.053 278.7)",
+          "oklch(35% 0.053 278.7)",
+          "oklch(45% 0.053 278.7)",
+          "oklch(58% 0.053 278.7)",
+          "oklch(70% 0.053 278.7)",
+          "oklch(82% 0.053 278.7)",
+          "oklch(95% 0.032 278.7)"
+        ]
+      },
+      "slate-muted": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "canonical": "oklch(49.3% 0.029 277.8)",
+        "tonalRamp": [
+          "oklch(15% 0.017 277.8)",
+          "oklch(25% 0.029 277.8)",
+          "oklch(35% 0.029 277.8)",
+          "oklch(45% 0.029 277.8)",
+          "oklch(58% 0.029 277.8)",
+          "oklch(70% 0.029 277.8)",
+          "oklch(82% 0.029 277.8)",
+          "oklch(95% 0.017 277.8)"
+        ]
+      },
+      "paper-rule": {
+        "role": "neutral",
+        "displayName": "Paper Rule",
+        "canonical": "oklch(84.1% 0.011 123.5)",
+        "tonalRamp": [
+          "oklch(15% 0.007 123.5)",
+          "oklch(25% 0.011 123.5)",
+          "oklch(35% 0.011 123.5)",
+          "oklch(45% 0.011 123.5)",
+          "oklch(58% 0.011 123.5)",
+          "oklch(70% 0.011 123.5)",
+          "oklch(82% 0.011 123.5)",
+          "oklch(95% 0.007 123.5)"
+        ]
+      },
+      "daguerreotype-gold": {
+        "role": "secondary",
+        "displayName": "Daguerreotype Gold",
+        "canonical": "oklch(75.2% 0.098 94.9)",
+        "tonalRamp": [
+          "oklch(15% 0.059 94.9)",
+          "oklch(25% 0.098 94.9)",
+          "oklch(35% 0.098 94.9)",
+          "oklch(45% 0.098 94.9)",
+          "oklch(58% 0.098 94.9)",
+          "oklch(70% 0.098 94.9)",
+          "oklch(82% 0.098 94.9)",
+          "oklch(95% 0.059 94.9)"
+        ]
+      },
+      "daguerreotype-gold-deep": {
+        "role": "secondary",
+        "displayName": "Daguerreotype Gold (light scheme)",
+        "canonical": "oklch(58.1% 0.084 95.1)",
+        "tonalRamp": [
+          "oklch(15% 0.051 95.1)",
+          "oklch(25% 0.084 95.1)",
+          "oklch(35% 0.084 95.1)",
+          "oklch(45% 0.084 95.1)",
+          "oklch(58% 0.084 95.1)",
+          "oklch(70% 0.084 95.1)",
+          "oklch(82% 0.084 95.1)",
+          "oklch(95% 0.051 95.1)"
+        ]
+      },
+      "ultramarine-thread": {
+        "role": "primary",
+        "displayName": "Ultramarine Thread",
+        "canonical": "oklch(67.6% 0.173 276.4)",
+        "tonalRamp": [
+          "oklch(15% 0.104 276.4)",
+          "oklch(25% 0.173 276.4)",
+          "oklch(35% 0.173 276.4)",
+          "oklch(45% 0.173 276.4)",
+          "oklch(58% 0.173 276.4)",
+          "oklch(70% 0.173 276.4)",
+          "oklch(82% 0.173 276.4)",
+          "oklch(95% 0.104 276.4)"
+        ]
+      },
+      "ultramarine-thread-deep": {
+        "role": "primary",
+        "displayName": "Ultramarine Thread (light scheme)",
+        "canonical": "oklch(46.2% 0.220 269.8)",
+        "tonalRamp": [
+          "oklch(15% 0.132 269.8)",
+          "oklch(25% 0.220 269.8)",
+          "oklch(35% 0.220 269.8)",
+          "oklch(45% 0.220 269.8)",
+          "oklch(58% 0.220 269.8)",
+          "oklch(70% 0.220 269.8)",
+          "oklch(82% 0.220 269.8)",
+          "oklch(95% 0.132 269.8)"
+        ]
+      },
+      "neon-magenta": {
+        "role": "secondary",
+        "displayName": "Neon Magenta",
+        "canonical": "oklch(72.3% 0.185 1.8)",
+        "tonalRamp": [
+          "oklch(15% 0.111 1.8)",
+          "oklch(25% 0.185 1.8)",
+          "oklch(35% 0.185 1.8)",
+          "oklch(45% 0.185 1.8)",
+          "oklch(58% 0.185 1.8)",
+          "oklch(70% 0.185 1.8)",
+          "oklch(82% 0.185 1.8)",
+          "oklch(95% 0.111 1.8)"
+        ]
+      },
+      "neon-magenta-deep": {
+        "role": "secondary",
+        "displayName": "Neon Magenta (light scheme)",
+        "canonical": "oklch(58.9% 0.202 4.0)",
+        "tonalRamp": [
+          "oklch(15% 0.121 4.0)",
+          "oklch(25% 0.202 4.0)",
+          "oklch(35% 0.202 4.0)",
+          "oklch(45% 0.202 4.0)",
+          "oklch(58% 0.202 4.0)",
+          "oklch(70% 0.202 4.0)",
+          "oklch(82% 0.202 4.0)",
+          "oklch(95% 0.121 4.0)"
+        ]
+      },
+      "sepia-tint": {
+        "role": "neutral",
+        "displayName": "Sepia Era Tint",
+        "canonical": "oklch(47.6% 0.052 82.7)",
+        "tonalRamp": [
+          "oklch(15% 0.031 82.7)",
+          "oklch(25% 0.052 82.7)",
+          "oklch(35% 0.052 82.7)",
+          "oklch(45% 0.052 82.7)",
+          "oklch(58% 0.052 82.7)",
+          "oklch(70% 0.052 82.7)",
+          "oklch(82% 0.052 82.7)",
+          "oklch(95% 0.031 82.7)"
+        ]
+      },
+      "mono-tint": {
+        "role": "neutral",
+        "displayName": "Mono Era Tint",
+        "canonical": "oklch(42.3% 0.025 276.4)",
+        "tonalRamp": [
+          "oklch(15% 0.015 276.4)",
+          "oklch(25% 0.025 276.4)",
+          "oklch(35% 0.025 276.4)",
+          "oklch(45% 0.025 276.4)",
+          "oklch(58% 0.025 276.4)",
+          "oklch(70% 0.025 276.4)",
+          "oklch(82% 0.025 276.4)",
+          "oklch(95% 0.015 276.4)"
+        ]
+      },
+      "colour-tint": {
+        "role": "neutral",
+        "displayName": "Colour Era Tint",
+        "canonical": "oklch(46.7% 0.156 270.1)",
+        "tonalRamp": [
+          "oklch(15% 0.094 270.1)",
+          "oklch(25% 0.156 270.1)",
+          "oklch(35% 0.156 270.1)",
+          "oklch(45% 0.156 270.1)",
+          "oklch(58% 0.156 270.1)",
+          "oklch(70% 0.156 270.1)",
+          "oklch(82% 0.156 270.1)",
+          "oklch(95% 0.094 270.1)"
+        ]
+      },
+      "year-chip-scrim": {
+        "role": "neutral",
+        "displayName": "Year Chip Scrim",
+        "canonical": "rgba(21, 23, 43, 0.82)"
+      }
+    },
+    "typographyMeta": {
+      "card-headline": {
+        "displayName": "Card Headline",
+        "purpose": "The one sentence on a bridge card; scales 1 / 0.86 / 0.74 by length."
+      },
+      "card-one-liner": {
+        "displayName": "Card One-liner",
+        "purpose": "Supporting line under the card headline, Dusk Muted."
+      },
+      "card-name": {
+        "displayName": "Card Name",
+        "purpose": "Uppercase full name under each portrait; 26u past 22 characters."
+      },
+      "card-year-chip": {
+        "displayName": "Year Chip",
+        "purpose": "Overlap years on the lifeline."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "Person name on a person page (3rem below 640px); other page titles 3rem."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles on inner pages."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-sections, sheet titles, menu items."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text; 65ch cap on prose pages."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Buttons, nav, list names, toasts."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Axis ticks, proof-line dates, source and licence notes."
+      }
+    },
+    "shadows": [
+      {
+        "name": "overlay",
+        "value": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+        "purpose": "Share sheet and desktop menu."
+      },
+      {
+        "name": "float",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Toasts, swipe hint, search results."
+      },
+      {
+        "name": "gap-ring",
+        "value": "0 0 0 calc(10 * var(--u)) #15172b",
+        "purpose": "Separates the bridge portrait from the endpoints it overlaps."
+      },
+      {
+        "name": "lifeline-lift",
+        "value": "0 0 calc(8 * var(--u)) rgba(0,0,0,0.6)",
+        "purpose": "Lifts lifeline segments off the faces."
+      },
+      {
+        "name": "pulse-ring",
+        "value": "0 0 0 10px rgb(125 137 255 / 0)",
+        "purpose": "End state of the overlap-dot pulse (starts at 0 0 0 0 / 0.7)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "lifeline-draw",
+        "value": "460ms cubic-bezier(0.4, 0, 0.2, 1), stagger 370ms, +150ms",
+        "purpose": "Each lifeline segment draws in left to right."
+      },
+      {
+        "name": "lifeline-mark",
+        "value": "260ms ease-out, stagger 370ms, +520ms",
+        "purpose": "Year chip rises 4px into place."
+      },
+      {
+        "name": "lifeline-pulse",
+        "value": "650ms ease-out, stagger 370ms, +560ms",
+        "purpose": "Overlap dot scales to 1.6 with an expanding ring, once."
+      },
+      {
+        "name": "card-exit",
+        "value": "150ms cubic-bezier(0.4, 0, 1, 1), translateY 28%, fade",
+        "purpose": "Current bridge leaves in the swipe direction."
+      },
+      {
+        "name": "card-enter",
+        "value": "240ms cubic-bezier(0, 0, 0.2, 1), from translateY 28%",
+        "purpose": "Next bridge arrives from the side it came from."
+      },
+      {
+        "name": "card-flip",
+        "value": "400ms cubic-bezier(0.3, 0.7, 0.2, 1), rotateY 180deg, perspective 1400px",
+        "purpose": "'how?' flips to the proof side."
+      },
+      {
+        "name": "fade-up",
+        "value": "300ms ease-out, from translateY 8px",
+        "purpose": "Toasts, hints, phone menu."
+      },
+      {
+        "name": "sheet-up",
+        "value": "240ms cubic-bezier(0.2, 0.8, 0.2, 1), from translateY 100%",
+        "purpose": "Share sheet on phones (fade-up 180ms from 640px)."
+      },
+      {
+        "name": "bar-grow",
+        "value": "900ms cubic-bezier(0.2, 0.7, 0.1, 1), stagger 180ms",
+        "purpose": "Timeline bars on the proof side."
+      },
+      {
+        "name": "snap-back",
+        "value": "180ms ease-out",
+        "purpose": "A short drag that doesn't pass the threshold returns to rest."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Pill Button",
+      "kind": "button",
+      "refersTo": "button-pill",
+      "description": "Quiet outlined pill under the card: 'how?' and 'Share'.",
+      "html": "<button class=\"ds-pill\" type=\"button\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5\"/></svg> Share</button>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 9999px; border: 1px solid var(--rule, #34385a); background: transparent; color: var(--ink, #e9eaf3); font: 500 0.875rem/1.43 var(--font-hanken, 'Hanken Grotesk'), system-ui, sans-serif; cursor: pointer; transition: border-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-pill:hover { border-color: var(--ink, #e9eaf3); } .ds-pill:focus-visible { outline: 2px solid var(--focus, #7d89ff); outline-offset: 3px; } .ds-pill:disabled { opacity: 0.3; border-color: var(--rule, #34385a); }"
+    },
+    {
+      "name": "Round Button",
+      "kind": "button",
+      "refersTo": "button-round",
+      "description": "44px outlined circle for previous/next bridge.",
+      "html": "<button class=\"ds-round\" type=\"button\" aria-label=\"Next bridge\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></button>",
+      "css": ".ds-round { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 9999px; border: 1px solid var(--rule, #34385a); background: transparent; color: var(--ink, #e9eaf3); cursor: pointer; transition: border-color 150ms cubic-bezier(0.4,0,0.2,1); } .ds-round:hover { border-color: var(--ink, #e9eaf3); } .ds-round:focus-visible { outline: 2px solid var(--focus, #7d89ff); outline-offset: 3px; }"
+    },
+    {
+      "name": "Edge Arrow",
+      "kind": "button",
+      "refersTo": "button-edge-arrow",
+      "description": "Desktop-only 64px borderless arrow at the screen edge.",
+      "html": "<button class=\"ds-edge\" type=\"button\" aria-label=\"Next bridge\"><svg width=\"36\" height=\"36\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 5l7 7-7 7\"/></svg></button>",
+      "css": ".ds-edge { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 9999px; border: 0; background: transparent; color: var(--muted, #9ea1b8); cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-edge:hover { background: var(--paper-2, #1d2038); color: var(--ink, #e9eaf3); } .ds-edge:focus-visible { outline: 2px solid var(--focus, #7d89ff); outline-offset: 3px; }"
+    },
+    {
+      "name": "Person Search",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Pill search field; border turns ultramarine on focus.",
+      "html": "<input class=\"ds-search\" type=\"search\" placeholder=\"Search anyone — Einstein, Cleopatra, Beyoncé…\" aria-label=\"Find a person\">",
+      "css": ".ds-search { width: 100%; max-width: 420px; padding: 12px 20px; border-radius: 9999px; border: 1px solid var(--rule, #34385a); background: var(--paper-2, #1d2038); color: var(--ink, #e9eaf3); font: 400 1rem/1.5 var(--font-hanken, 'Hanken Grotesk'), system-ui, sans-serif; } .ds-search::placeholder { color: var(--muted, #9ea1b8); } .ds-search:focus { outline: none; border-color: var(--bridge, #7d89ff); }"
+    },
+    {
+      "name": "Feed Header",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "56px blurred header with the Gloock wordmark and menu button.",
+      "html": "<header class=\"ds-header\"><a class=\"ds-wordmark\" href=\"#\">Alive At Once</a><button class=\"ds-menu\" type=\"button\" aria-label=\"Menu\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M4 7h16M4 12h16M4 17h16\"/></svg></button></header>",
+      "css": ".ds-header { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 16px; background: color-mix(in srgb, var(--paper, #15172b) 70%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid color-mix(in srgb, var(--rule, #34385a) 40%, transparent); color: var(--ink, #e9eaf3); } .ds-wordmark { font: 400 1.25rem/1.4 var(--font-gloock, Gloock), Georgia, serif; color: inherit; text-decoration: none; } .ds-wordmark:focus-visible, .ds-menu:focus-visible { outline: 2px solid var(--focus, #7d89ff); outline-offset: 3px; } .ds-menu { padding: 8px; margin-right: -8px; border: 0; border-radius: 9999px; background: transparent; color: inherit; cursor: pointer; } .ds-menu:hover { background: var(--paper-2, #1d2038); }"
+    },
+    {
+      "name": "Share Sheet Row",
+      "kind": "custom",
+      "refersTo": "sheet-row",
+      "description": "Icon, title and muted hint in a 16px-rounded hover row.",
+      "html": "<button class=\"ds-row\" type=\"button\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1\"/></svg><span><span class=\"ds-row-title\">Copy link</span><span class=\"ds-row-hint\">aliveatonce.app/b/picasso-darwin-eminem</span></span></button>",
+      "css": ".ds-row { display: flex; width: 100%; max-width: 360px; align-items: center; gap: 16px; padding: 14px 16px; border: 0; border-radius: 16px; background: transparent; color: var(--ink, #e9eaf3); text-align: left; font-family: var(--font-hanken, 'Hanken Grotesk'), system-ui, sans-serif; cursor: pointer; } .ds-row:hover, .ds-row:focus-visible { background: var(--paper-2, #1d2038); outline: none; } .ds-row-title { display: block; font-weight: 500; } .ds-row-hint { display: block; font-size: 0.875rem; color: var(--muted, #9ea1b8); }"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Inverted pill confirmation that fades up and leaves after 2.2s.",
+      "html": "<span class=\"ds-toast\" role=\"status\">Link copied</span>",
+      "css": ".ds-toast { display: inline-block; padding: 8px 16px; border-radius: 9999px; background: var(--ink, #e9eaf3); color: var(--paper, #15172b); font: 500 0.875rem/1.43 var(--font-hanken, 'Hanken Grotesk'), system-ui, sans-serif; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); animation: ds-fade-up 300ms ease-out both; } @keyframes ds-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } @media (prefers-reduced-motion: reduce) { .ds-toast { animation: none; } }"
+    },
+    {
+      "name": "Lifeline",
+      "kind": "custom",
+      "refersTo": "year-chip",
+      "description": "Signature three-segment lifeline in gold, ultramarine and magenta, with a pulsing overlap year.",
+      "html": "<div class=\"ds-ll\"><span class=\"ds-ll-seg\" style=\"--i:0;left:0;width:38%;background:var(--past, #c2ae63)\"></span><span class=\"ds-ll-seg\" style=\"--i:1;left:30%;width:42%;background:var(--bridge, #7d89ff)\"></span><span class=\"ds-ll-seg\" style=\"--i:2;left:64%;width:36%;background:var(--future, #ff6b9d)\"></span><span class=\"ds-ll-mark\" style=\"left:34%\"><span class=\"ds-ll-year\">1882</span><span class=\"ds-ll-dot\"></span></span><span class=\"ds-ll-mark\" style=\"left:68%\"><span class=\"ds-ll-year\">1972</span><span class=\"ds-ll-dot\"></span></span></div>",
+      "css": ".ds-ll { position: relative; width: 100%; max-width: 480px; height: 72px; background: #15172b; } .ds-ll-seg { position: absolute; top: 50px; height: 4px; border-radius: 3px; box-shadow: 0 0 6px rgba(0,0,0,0.6); transform-origin: left center; animation: ds-draw 460ms cubic-bezier(0.4,0,0.2,1) both; animation-delay: calc(var(--i) * 370ms + 150ms); } .ds-ll-mark { position: absolute; top: 8px; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); } .ds-ll-year { padding: 2px 8px; border-radius: 9999px; background: rgba(21,23,43,0.82); color: #e9eaf3; font: 700 0.8rem/1.3 var(--font-hanken, 'Hanken Grotesk'), system-ui, sans-serif; letter-spacing: 0.03em; font-feature-settings: \"tnum\" 1; } .ds-ll-dot { width: 12px; height: 12px; margin-top: 8px; border-radius: 50%; background: #e9eaf3; border: 3px solid #7d89ff; animation: ds-pulse 650ms ease-out 900ms both; } @keyframes ds-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } } @keyframes ds-pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgb(125 137 255 / 0.7); } 45% { transform: scale(1.6); box-shadow: 0 0 0 10px rgb(125 137 255 / 0); } 100% { transform: scale(1); } } @media (prefers-reduced-motion: reduce) { .ds-ll-seg, .ds-ll-dot { animation: none; } }"
+    },
+    {
+      "name": "Headline",
+      "kind": "custom",
+      "refersTo": "card-headline",
+      "description": "Gloock headline with its one italic ultramarine emphasis.",
+      "html": "<p class=\"ds-headline\">Picasso caught <em>both Darwin and Eminem</em></p>",
+      "css": ".ds-headline { margin: 0; max-width: 560px; font: 400 2.5rem/1.08 var(--font-gloock, Gloock), Georgia, serif; color: #e9eaf3; text-align: center; text-wrap: balance; background: #15172b; padding: 16px; } .ds-headline em { font-style: italic; color: #7d89ff; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night Archive",
+    "overview": "Each bridge is a single cinematic frame: a midnight-ink screen, three portraits lit out of the dark, a lifeline drawn across the top, and one big serif headline. It's bold through scale, contrast and cutting, not through chrome. The card fills the viewport, and moving to the next card is a cut: the old frame slides 28% away and fades, and the new one comes in from the side the swipe came from. The photographs feel archival: earlier faces arrive sepia or black-and-white, modern ones in full colour, so the jump across centuries is visible before anyone reads a date.\n\nThe frame works like a film: dark ground, hard-lit subjects, minimal UI. The palette stays cold and quiet so the portraits, the three meaning colours and the italic ultramarine emphasis carry all the punch. Controls are quiet outlined pills sitting below the frame. Inner pages (person, about, collections) follow the same type and colour vocabulary at reading density, with a light Lamplit Paper scheme that switches to midnight under `prefers-color-scheme: dark`.\n\nEvery card is also a still. The live card, the 9:16 story image and the Open Graph image come from the same component and the same unit grid, so a screenshot is always a finished, shareable image.",
+    "keyCharacteristics": [
+      "Always-dark bridge card; portraits are the only strong colour on it.",
+      "Three meaning colours: gold for the earlier figure, ultramarine for the bridge life, magenta for the later figure.",
+      "Era-filtered portraits (sepia before 1850, mono 1850–1949, colour from 1950).",
+      "A Gloock display serif for headlines and Hanken Grotesk for everything else, with tabular lining numerals.",
+      "One unit grid (1000u per card width) shared by the live card and the share images.",
+      "Flat, tonally layered surfaces; shadows only on things that float.",
+      "Motion choreographed around the lifeline: draw, then pulse the overlap years."
+    ],
+    "rules": [
+      {
+        "name": "The Three Lives Rule",
+        "body": "Gold always means the earlier figure, ultramarine the bridge, magenta the later figure, on every surface (lifeline, timelines, proof lines). Never swap them, and never use them as decoration with no meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Portraits Are the Colour Rule",
+        "body": "On the bridge card, the only large saturated areas are the portraits. Chrome stays in ink, muted and rule. The meaning colours appear only as thin lines, rings and the headline emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Always-Night Card Rule",
+        "body": "The bridge card, face cards and every share image use the `.theme-dark` values whatever the system scheme is. Only the inner pages follow `prefers-color-scheme`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Serif Shouts, the Sans Proves Rule",
+        "body": "Gloock is only for headlines and titles. Every name, date, number and credit is in Hanken Grotesk.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Italic Rule",
+        "body": "A headline has at most one emphasised phrase, and it is always Gloock italic in Ultramarine Thread. No bold, underline or second colour inside headlines.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Grid Rule",
+        "body": "Anything drawn on the card is positioned in `u()` units through `CardArt`, never in px or rem. That is what keeps the live card, the story image and the OG image identical.",
+        "section": "layout"
+      },
+      {
+        "name": "The Only Floaters Cast Shadows Rule",
+        "body": "If an element doesn't sit over other content, it gets no shadow. Cards, the header and buttons stay flat.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep the bridge card and every share image on Midnight Ink (`.theme-dark`), whatever the system scheme.",
+      "**Do** colour the three lives as gold → ultramarine → magenta, in that order, every time.",
+      "**Do** apply the era filter to portraits: sepia before 1850, mono 1850–1949, colour from 1950.",
+      "**Do** lay out anything on the card in `u()` units through `CardArt`, so the live card and the images match.",
+      "**Do** keep controls at 44px or larger, as quiet outlined pills or circles.",
+      "**Do** set years and numbers in Hanken Grotesk with tabular lining figures.",
+      "**Do** honour `prefers-reduced-motion` by removing every animation and the flip transition."
+    ],
+    "donts": [
+      "**Don't** add large saturated fills, gradients or coloured panels to the card. Strong colour on it comes from the portraits.",
+      "**Don't** use gold, ultramarine or magenta for anything that isn't one of the three lives (ultramarine also covers focus and the active accent).",
+      "**Don't** set names, dates or credits in Gloock, or more than one italic phrase in a headline.",
+      "**Don't** put shadows on cards, the header or buttons. Shadows are only for overlays.",
+      "**Don't** introduce square corners on controls or containers. The form language is round."
+    ]
+  }
+}
