@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s · Alive At Once",
   },
   description:
-    "Surprising lifetime overlaps between famous people. Picasso caught Darwin and Eminem.",
+    "Surprising lifetime overlaps between famous people. Pablo Picasso caught Charles Darwin and Eminem.",
   openGraph: { siteName: "Alive At Once", type: "website" },
   twitter: { card: "summary_large_image" },
 };

@@ -10,7 +10,7 @@
  */
 import type { CSSProperties } from "react";
 import type { Fact, Person } from "@/lib/db";
-import { emphasis, shortName } from "@/lib/headline";
+import { emphasis, headlineScale, labelName } from "@/lib/headline";
 import { cropStyle, ERA_FILTER, ERA_TINT, eraOf, initials, portraitSources } from "@/lib/photo";
 import { lifeYears, moments, thumb } from "@/lib/present";
 
@@ -32,11 +32,14 @@ const OVERLAP = D_END * 0.18;
 const X = [0, D_END - OVERLAP, D_END - OVERLAP + D_BRIDGE - OVERLAP]; // left edges
 const SIZES = [D_END, D_BRIDGE, D_END];
 const TOPS = SIZES.map((s) => (D_BRIDGE - s) / 2);
-const LINE_Y = D_BRIDGE / 2 - D_END * 0.1; // eye level
 const LENS = [(X[1] + X[0] + D_END) / 2, (X[2] + X[1] + D_BRIDGE) / 2]; // centres of the two overlaps
+// The lifeline runs in its own band above the portraits, clear of the faces.
+const BAND = 100;
+const LINE_Y = 72;
 const LABEL_GAP = 22;
-/** Height of the faces block, names included. */
-export const FACES_HEIGHT = D_BRIDGE + LABEL_GAP + 100;
+const LABEL_HEIGHT = 130; // up to two lines of name, then the years
+/** Height of the faces block, lifeline and names included. */
+export const FACES_HEIGHT = BAND + D_BRIDGE + LABEL_GAP + LABEL_HEIGHT;
 
 export type Unit = (n: number) => number | string;
 export const cssUnit: Unit = (n) => `calc(${+n.toFixed(2)} * var(--u))`;
@@ -112,16 +115,17 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
     [X[1], X[1] + D_BRIDGE],
     [X[2], X[2] + D_END * 0.9],
   ];
-  const height = labels ? FACES_HEIGHT : D_BRIDGE;
+  const top = lifeline ? BAND : 0;
+  const height = top + D_BRIDGE + (labels ? LABEL_GAP + LABEL_HEIGHT : 0);
   return (
     <div style={{ position: "relative", display: "flex", width: u(1000), height: u(height) }}>
       {/* Paint order = DOM order in Satori (no z-index): bridge last so it sits on top. */}
-      {[0, 2, 1].map((i) => people[i]).map((p) => ({ p, i: people.indexOf(p) })).map(({ p, i }) => (
+      {[0, 2, 1].map((i) => people[i]).map((p) => ({ p, i: people.indexOf(p), name: labelName(p) })).map(({ p, i, name }) => (
         <div
           key={p.id}
           style={{
             position: "absolute", display: "flex", flexDirection: "column", alignItems: "center",
-            left: u(X[i]), top: u(TOPS[i]), width: u(SIZES[i]),
+            left: u(X[i]), top: u(top + TOPS[i]), width: u(SIZES[i]),
             // Bridge on top, with a gap ring in the background colour so the overlap reads cleanly.
             ...(i === 1 && live ? { zIndex: 2 } : {}),
           }}
@@ -143,11 +147,11 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
             >
               <span
                 style={{
-                  fontFamily: fonts.body, fontSize: u(32), fontWeight: 600, letterSpacing: "0.09em",
-                  textTransform: "uppercase", color: CARD.ink, lineHeight: 1.2,
+                  fontFamily: fonts.body, fontSize: u(name.length > 22 ? 26 : 30), fontWeight: 600,
+                  letterSpacing: "0.06em", textTransform: "uppercase", color: CARD.ink, lineHeight: 1.2,
                 }}
               >
-                {shortName(p)}
+                {name}
               </span>
               <span style={{ fontFamily: fonts.body, fontSize: u(30), color: CARD.muted, marginTop: u(6) }}>
                 {lifeYears(p)}
@@ -206,7 +210,7 @@ export function Headline({ text, u, fonts, live, size = 80, as: Tag = "div" }: {
   text: string; u: Unit; fonts: Fonts; live?: boolean; size?: number; as?: "div" | "h1" | "h2";
 }) {
   const style: CSSProperties = {
-    margin: 0, width: "100%", fontFamily: fonts.display, fontWeight: 400, fontSize: u(size), lineHeight: 1.08,
+    margin: 0, width: "100%", fontFamily: fonts.display, fontWeight: 400, fontSize: u(size * headlineScale(text)), lineHeight: 1.08,
     color: CARD.ink, textAlign: "center",
   };
   const em: CSSProperties = { fontStyle: "italic", color: CARD.bridge };

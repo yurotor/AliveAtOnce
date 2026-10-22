@@ -94,7 +94,7 @@ export async function storyImage(f: Fact) {
 
 /** 1200×630 link preview: the faces and the headline. */
 export async function ogImage(f: Fact) {
-  const width = 680;
+  const width = 600;
   const u = pxUnit(width / 1000);
   return new ImageResponse(
     (

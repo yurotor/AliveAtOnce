@@ -37,12 +37,12 @@ Each card shows three faces: an EARLIER person, a BRIDGE person whose life overl
 
 For each card write:
 
-1. shortNames: the short, commonly known name for each of the three people, the way a headline would say it ("Picasso", "Darwin", "Eminem", "Queen Victoria", "Napoleon", "Lincoln"). It must be part of their full name, or the full name itself if nothing shorter is widely used. If the short form would be ambiguous with another famous person (Jackson, Jones, Johnson, Ford, Bush, Adams, Roosevelt), keep enough of the name to be unambiguous ("Michael Jackson").
+1. shortNames: the name a headline should use for each of the three people: their common full name, first and last ("Pablo Picasso", "Charles Darwin", "Abraham Lincoln"), with a title for royalty ("Queen Victoria", "King Charles II", "Tsar Nicholas II", "the Queen Mother"). Use a single name only when that is the name they go by (Eminem, Madonna, Michelangelo, Voltaire). Drop peerage tails and rarely used middle names ("Lord Palmerston", "Gottfried Leibniz").
 
 2. headline: the shortest line that states the bridge, grammatically correct, with a slight street edge.
    - Default shape: "{Bridge} caught {Earlier} *and* {Later}." Write it like that unless you have something clearly better.
    - At most ${HEADLINE_MAX} characters (not counting asterisks). Wrap the word "and" in asterisks (*and*) when it joins the two names.
-   - Use the short names. Factually accurate: "caught" or "was alive with" only. Never say someone lived in another person's era or time, because the overlap may be months.
+   - Use those names in full. Factually accurate: "caught" or "was alive with" only. Never say someone lived in another person's era or time, because the overlap may be months.
    - No heavy slang ("no cap", "fr", "lowkey"), no emoji, no hashtags.
 
 3. oneLiner: one punchy line, at most ${ONE_LINER_MAX} characters, that lands the twist with the actual ages, e.g. "He was a baby when Darwin died, and 90 when Eminem was born." Optional: return "" if nothing good fits.
@@ -61,9 +61,8 @@ const schema = z.object({
   })),
 });
 
-/** Only accept a short name that is part of the full name (accents ignored). */
-const fold = (s: string) => s.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase();
-const validShort = (short: string, p: Person) => short.length > 1 && short.length <= 24 && fold(p.name).includes(fold(short.trim()));
+/** Headline names may add a title ("King Charles II"), so only the length is checked. */
+const validShort = (short: string) => short.length > 1 && short.length <= 32;
 
 async function main() {
   if (!DIRECT && !process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
@@ -113,7 +112,7 @@ async function main() {
         if (!c) continue;
         const [x, e, l] = [c.bridge, c.early, c.late].map((pid) => people.get(pid)!);
         for (const [p, short] of [[x, card.shortNames.bridge], [e, card.shortNames.earlier], [l, card.shortNames.later]] as const) {
-          if (!shortNames[p.id] && validShort(short, p)) shortNames[p.id] = short.trim();
+          if (!shortNames[p.id] && validShort(short)) shortNames[p.id] = short.trim();
         }
         const headline = checkCopy(card.headline, HEADLINE_MAX);
         const oneLiner = checkCopy(card.oneLiner, ONE_LINER_MAX);

@@ -4,7 +4,7 @@
  * Uses Jev scores and Claude copy when present; otherwise falls back to the
  * step-3 heuristic ranking with template headlines, so the site works before any
  * AI keys exist. A bridge joins the homepage feed when Jev rated it 8+, all three
- * people have a usable photo, and its headline fits (≤ 40 chars).
+ * people have a usable photo, and its headline fits (HEADLINE_MAX).
  *
  * Re-running upserts: fact ids and /b/{slug} slugs never change once assigned,
  * so shared links never break; facts that drop out are marked inactive, not deleted.

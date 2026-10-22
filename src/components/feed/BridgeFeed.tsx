@@ -13,6 +13,8 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, MenuIcon, ShareIcon 
 
 const FONTS = { display: "var(--font-gloock), Georgia, serif", body: "var(--font-hanken), system-ui, sans-serif" };
 const HINT_KEY = "aao:swiped";
+/** i mod n, always in [0, n). */
+const wrap = (i: number, n: number) => ((i % n) + n) % n;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Shuffle within windows of 6, so the order stays roughly best-first but return visits feel fresh. */
@@ -53,6 +55,8 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
   const [hint, setHint] = useState(false);
 
   const order = useRef([initial.slug, ...feed.filter((s) => s !== initial.slug)]);
+  // The feed loops both ways: index is any integer, wrapped onto the order.
+  const at = useCallback((i: number) => order.current[wrap(i, order.current.length)], []);
   const cache = useRef(new Map<string, Promise<Fact>>([[initial.slug, Promise.resolve(initial)]]));
   const stage = useRef<HTMLDivElement>(null);
   const busy = useRef(false);
@@ -77,11 +81,8 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
 
   // Preload the next two bridges (and the previous one) so a swipe never shows an empty circle.
   useEffect(() => {
-    for (const i of [index + 1, index + 2, index - 1]) {
-      const slug = order.current[i];
-      if (slug) load(slug).then(preloadPortraits, () => {});
-    }
-  }, [index, load]);
+    for (const i of [index + 1, index + 2, index - 1]) load(at(i)).then(preloadPortraits, () => {});
+  }, [index, at, load]);
 
   // First visit only: a "swipe for more" hint.
   useEffect(() => {
@@ -101,19 +102,23 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
 
   const go = useCallback(async (delta: 1 | -1) => {
     const el = stage.current;
-    const { index: i } = live.current;
-    const slug = order.current[i + delta];
-    if (busy.current || !el) return;
-    if (!slug) {
-      // End of the feed: a small bounce.
-      if (!reducedMotion()) el.animate([{ transform: "none" }, { transform: `translateY(${-delta * 14}px)` }, { transform: "none" }], 260);
-      return;
-    }
+    if (busy.current || !el || order.current.length < 2) return;
     busy.current = true;
     setHint(false);
     try { localStorage.setItem(HINT_KEY, "1"); } catch {}
     try {
-      const next = await load(slug);
+      // A card that won't load (e.g. a slug gone since the feed list was cached) is dropped, not a dead end.
+      let i = live.current.index;
+      let next: Fact | null = null;
+      while (!next && order.current.length > 1) {
+        const k = wrap(i + delta, order.current.length);
+        next = await load(order.current[k]).catch(() => null);
+        if (!next) {
+          if (k < wrap(i, order.current.length)) i--; // keep i pointing at the current card
+          order.current.splice(k, 1);
+        }
+      }
+      if (!next) throw new Error("feed is empty");
       if (!reducedMotion()) {
         const from = el.style.transform || "none";
         await el.animate(
@@ -124,7 +129,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
       }
       el.style.transform = "";
       el.style.opacity = "";
-      history.pushState({ aao: slug }, "", factPath(next));
+      history.pushState({ aao: next.slug }, "", factPath(next));
       show(next, i + delta);
     } catch {
       el.style.transform = "";
@@ -155,11 +160,16 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
       const m = location.pathname.match(/^\/b\/([^/]+)/);
       const slug = m ? decodeURIComponent(m[1]) : home ? order.current[0] : null;
       if (!slug) return;
-      let i = order.current.indexOf(slug);
-      if (i < 0) {
-        order.current.splice(live.current.index + 1, 0, slug);
-        i = live.current.index + 1;
+      const cur = live.current.index;
+      let k = order.current.indexOf(slug);
+      if (k < 0) {
+        k = wrap(cur, order.current.length) + 1;
+        order.current.splice(k, 0, slug);
       }
+      // Step to the copy of that card nearest the current one on the loop.
+      let d = wrap(k - cur, order.current.length);
+      if (d > order.current.length / 2) d -= order.current.length;
+      const i = cur + d;
       load(slug).then((f) => show(f, i), () => location.reload());
     };
     window.addEventListener("popstate", onPop);
@@ -242,15 +252,13 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
   }, []);
   const closeSheet = useCallback(() => setSheet(null), []);
 
-  const atStart = index === 0;
-  const atEnd = index >= (feed.includes(initial.slug) ? feed.length : feed.length + 1) - 1;
   const round = "flex h-11 w-11 items-center justify-center rounded-full border border-rule text-ink transition hover:border-ink disabled:opacity-30 disabled:hover:border-rule";
   const pill = "flex h-11 items-center gap-2 rounded-full border border-rule px-5 text-sm font-medium transition hover:border-ink";
 
   return (
     <div
       className="theme-dark fixed inset-0 overflow-hidden bg-paper text-ink"
-      style={{ "--cw": "min(calc(100vw - 32px), 720px, calc((100dvh - 170px) * 1.05))", "--u": "calc(var(--cw) / 1000)" } as CSSProperties}
+      style={{ "--cw": "min(calc(100vw - 32px), 720px, calc((100dvh - 170px) * 0.92))", "--u": "calc(var(--cw) / 1000)" } as CSSProperties}
     >
       <header className="absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-rule/40 bg-paper/70 px-4 backdrop-blur-md">
         <Link href="/" className="font-display text-xl" aria-label="Alive At Once, today’s bridge">
@@ -285,7 +293,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
         </div>
 
         <nav aria-label="Bridge controls" className="flex items-center gap-3 pb-5 pt-2">
-          <button type="button" className={round} onClick={() => go(-1)} disabled={atStart} aria-label="Previous bridge">
+          <button type="button" className={round} onClick={() => go(-1)} aria-label="Previous bridge">
             <ChevronUp className="sm:hidden" />
             <ChevronLeft className="hidden sm:block" />
           </button>
@@ -295,7 +303,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
           <button type="button" className={pill} onClick={() => setSheet("share")}>
             <ShareIcon className="h-5 w-5" /> Share
           </button>
-          <button type="button" className={round} onClick={() => go(1)} disabled={atEnd} aria-label="Next bridge">
+          <button type="button" className={round} onClick={() => go(1)} aria-label="Next bridge">
             <ChevronDown className="sm:hidden" />
             <ChevronRight className="hidden sm:block" />
           </button>
@@ -306,7 +314,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
       <button
         type="button"
         onClick={() => go(-1)}
-        disabled={atStart}
+       
         aria-label="Previous bridge"
         className="absolute left-5 top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full text-muted transition hover:bg-paper-2 hover:text-ink disabled:invisible sm:flex"
       >
@@ -315,7 +323,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
       <button
         type="button"
         onClick={() => go(1)}
-        disabled={atEnd}
+       
         aria-label="Next bridge"
         className="absolute right-5 top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full text-muted transition hover:bg-paper-2 hover:text-ink disabled:invisible sm:flex"
       >
