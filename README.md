@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alive At Once
 
-## Getting Started
+Surprising lifetime overlaps between famous people — **aliveatonce.app**.
+Plan: [`Alive At Once — MVP Plan.md`](./Alive%20At%20Once%20—%20MVP%20Plan.md).
 
-First, run the development server:
+Next.js 16 (App Router, Cache Components) · Neon Postgres · Vercel AI Gateway (Jev + Claude).
+
+## Run locally
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in DATABASE_URL and AI_GATEWAY_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Data pipeline
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Each step writes to `data/` (git-ignored) and is safe to re-run; the slow steps resume from cache.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Step | Command | What it does | Needs |
+| --- | --- | --- | --- |
+| 1 | `npm run data:people` | ~86k humans with ≥20 Wikipedia language editions from Wikidata (via QLever), with uncertainty-aware birth/death bounds | — |
+| 2 | `npm run data:rank` | Ranks by English Wikipedia pageviews (last ~60 days) blended with sitelinks; keeps top 50k. ~1h, rate-limited by Wikimedia. `SKIP_PAGEVIEWS=1` = sitelinks only | — |
+| 3 | `npm run data:candidates` | Finds "bridges": one life that overlapped an earlier and a later figure who never overlapped each other | — |
+| 4 | `npm run data:score` | **Jev** (`typesafe-ai/jev`) scores surprise + recognisability for each candidate | `AI_GATEWAY_API_KEY` |
+| 5 | `npm run data:write` | **Claude** (Sonnet 5.5) writes a one-liner for the top 3,000 | `AI_GATEWAY_API_KEY` |
+| 6 | `npm run data:load` | Loads people + facts into Postgres | `DATABASE_URL` |
 
-## Learn More
+Steps 4–5 are optional: without them, step 6 loads heuristic-ranked bridges with template lines, so the site works before any AI keys exist.
 
-To learn more about Next.js, take a look at the following resources:
+Useful knobs: `TOP_N`, `BRIDGE_POOL`, `END_POOL`, `MAX_CANDIDATES`, `SCORE_LIMIT`, `TOP_FACTS`, `JEV_MODEL`, `WRITER_MODEL` (e.g. `anthropic/claude-haiku-5.5` for cheap drafts).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Date accuracy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Every person carries earliest/latest possible birth and death (`src/lib/life.ts`). An overlap is only claimed when it's true for every reading of the dates; people whose sources disagree by more than two years are dropped; Wikidata "preferred" statements win.
 
-## Deploy on Vercel
+## Site
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `/` — today's bridge (rotates daily, UTC) + search + more bridges
+- `/p/[slug]` — person page: lifetime chart vs famous contemporaries, surprising overlaps, who was alive when they were born / who was born during their life (SEO: "who was alive at the same time as …")
+- `/bridge/[id]` — a single shareable bridge
+- Share cards: `opengraph-image` on every page (watermarked aliveatonce.app)
+- `/privacy`, `/terms` — needed for the TikTok developer app
+- Sitemaps at `/sitemap/0.xml` … `/sitemap/5.xml`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+```bash
+vercel link
+vercel env add DATABASE_URL production
+vercel --prod
+vercel domains add aliveatonce.app
+```
+
+On Vercel, AI Gateway authenticates via OIDC automatically; the key is only needed for running the pipeline locally.
