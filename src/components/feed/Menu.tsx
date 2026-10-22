@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
 import { Search } from "../Search";
 import { CloseIcon } from "./icons";
+import { useDialog } from "./useDialog";
 
 /** Everything beyond the card: full-screen sheet on phones, a dropdown on desktop. */
 export function Menu({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const box = useDialog<HTMLDivElement>(onClose);
 
   const item = "block rounded-2xl px-4 py-3 hover:bg-paper-2";
   return (
-    <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Menu">
-      <button type="button" aria-label="Close menu" className="absolute inset-0 hidden bg-black/40 sm:block" onClick={onClose} />
+    <div ref={box} className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Menu">
+      <button type="button" tabIndex={-1} aria-label="Close menu" className="absolute inset-0 hidden bg-black/40 sm:block" onClick={onClose} />
       <div className="fade-up absolute inset-0 flex flex-col bg-paper px-4 pb-8 pt-3 sm:inset-auto sm:right-4 sm:top-14 sm:w-96 sm:rounded-3xl sm:border sm:border-rule sm:p-3 sm:shadow-2xl">
         <div className="flex items-center justify-between sm:hidden">
           <span className="font-display text-xl">Alive At Once</span>
-          <button type="button" onClick={onClose} aria-label="Close menu" className="rounded-full p-2 text-muted hover:text-ink">
+          <button type="button" onClick={onClose} aria-label="Close menu" className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full text-muted hover:text-ink">
             <CloseIcon />
           </button>
         </div>

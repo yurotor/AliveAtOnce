@@ -53,7 +53,7 @@ type Fact = { key: string; bridge: string; early: string; late: string };
  * Pick the top `n` facts from an already-ranked list, with a diversity cap:
  * each bridge person once, and nobody as the early/late figure more than `maxPerEnd` times.
  */
-export function selectFacts<T extends Fact>(ranked: T[], n: number, maxPerEnd = 25): T[] {
+export function selectFacts<T extends Fact>(ranked: T[], n: number, maxPerEnd = 8): T[] {
   const uses = new Map<string, number>();
   const bridges = new Set<string>();
   const chosen: T[] = [];

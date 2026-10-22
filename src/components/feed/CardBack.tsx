@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Fact } from "@/lib/db";
-import { shortName } from "@/lib/headline";
+import { emphasis, shortName } from "@/lib/headline";
 import { currentYear } from "@/lib/life";
 import { moments, personPath, trio } from "@/lib/present";
 import { Timeline } from "../Timeline";
@@ -11,6 +11,10 @@ export function CardBack({ fact }: { fact: Fact }) {
   const people = trio(fact);
   return (
     <div className="h-full overflow-y-auto overscroll-contain px-1 py-2 text-sm">
+      {/* The claim being proved, so nobody has to flip back to remember it. */}
+      <p className="mb-6 text-balance font-display text-xl leading-snug">
+        {emphasis(fact.headline).map((s, i) => (s.em ? <em key={i} className="pr-[0.08em] text-bridge">{s.text}</em> : s.text))}
+      </p>
       <Timeline
         rows={[
           { person: fact.early, tone: "past" },

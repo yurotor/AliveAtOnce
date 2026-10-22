@@ -24,6 +24,11 @@ function niceStep(span: number, target = 6) {
   return [1, 2, 2.5, 5, 10].map((m) => m * pow).find((s) => s >= raw) ?? raw;
 }
 
+/** Axis labels centre on their tick, except at the ends, where they'd be clipped. */
+function tickShift(pos: number) {
+  return pos < 6 ? "" : pos > 94 ? "-translate-x-full" : "-translate-x-1/2";
+}
+
 function scaleFor(rows: TimelineRow[], now: number) {
   const lo = Math.min(...rows.map((r) => r.person.bLo));
   const hi = Math.max(...rows.map((r) => r.person.dHi ?? now));
@@ -92,7 +97,7 @@ export function Timeline({ rows, markers = [], now, animate = false }: {
             return (
               <li key={r.person.name} className="relative h-10">
                 <div
-                  className="absolute top-0 text-sm whitespace-nowrap"
+                  className="absolute top-0 bg-paper text-sm whitespace-nowrap"
                   style={alignRight ? { right: `${100 - end}%` } : { left: `${start}%` }}
                 >
                   {name} <span className="text-muted">{lifeYears(r.person)}</span>
@@ -109,7 +114,7 @@ export function Timeline({ rows, markers = [], now, animate = false }: {
         {ticks.map((t) => (
           <span
             key={t}
-            className="absolute top-1 -translate-x-1/2 text-xs text-muted"
+            className={`absolute top-1 text-xs text-muted ${tickShift(x(t))}`}
             style={{ left: `${x(t)}%` }}
           >
             {displayYear(t)}
@@ -183,7 +188,7 @@ export function LifeChart({ subject, others, now }: {
       </div>
       <div className="relative mt-2 h-5 border-t border-rule" aria-hidden>
         {ticks.map((t) => (
-          <span key={t} className="absolute top-1 -translate-x-1/2 text-xs text-muted" style={{ left: `${x(t)}%` }}>
+          <span key={t} className={`absolute top-1 text-xs text-muted ${tickShift(x(t))}`} style={{ left: `${x(t)}%` }}>
             {displayYear(t)}
           </span>
         ))}

@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { cacheLife } from "next/cache";
 import type { Life } from "./life";
+import type { FeedItem } from "./feed-order";
 import type { Photo } from "./photo";
 import { templateHeadline } from "./headline";
 
@@ -83,7 +84,17 @@ export async function getDailyFact() {
   return rows[0] ? { fact: toFact(rows[0]), date: new Date(LAUNCH + day * 86_400_000).toISOString() } : null;
 }
 
-/** Every homepage-feed bridge's slug, best first. The client shuffles lightly. */
+/** Every homepage-feed bridge with its people, best first. The client shuffles and spaces it. */
+export async function getFeed(): Promise<FeedItem[]> {
+  "use cache";
+  cacheLife("hours");
+  const rows = (await sql.query(
+    `SELECT slug, early_id, bridge_id, late_id FROM facts WHERE active AND feed ORDER BY score DESC, id`,
+  )) as { slug: string; early_id: string; bridge_id: string; late_id: string }[];
+  return rows.map((r) => ({ slug: r.slug, people: [r.early_id, r.bridge_id, r.late_id] }));
+}
+
+/** Every homepage-feed bridge's slug, best first. */
 export async function getFeedSlugs() {
   "use cache";
   cacheLife("hours");

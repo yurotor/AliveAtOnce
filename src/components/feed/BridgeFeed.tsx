@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
 import Link from "next/link";
 import type { Fact } from "@/lib/db";
 import { portraitSources } from "@/lib/photo";
+import { spaceOut, type FeedItem } from "@/lib/feed-order";
 import { factPath, plainHeadline } from "@/lib/present";
 import { CardArt, cssUnit, PORTRAIT_SIZES } from "../CardArt";
 import { CardBack } from "./CardBack";
@@ -46,7 +47,7 @@ function preloadPortraits(f: Fact) {
  * arrows, keys or the wheel (desktop) move through the ranked feed; each card
  * has its own /b/{slug} URL, kept in sync with history.pushState.
  */
-export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; feed: string[]; home?: boolean }) {
+export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; feed: FeedItem[]; home?: boolean }) {
   const [fact, setFact] = useState(initial);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -54,7 +55,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
   const [toast, setToast] = useState<string | null>(null);
   const [hint, setHint] = useState(false);
 
-  const order = useRef([initial.slug, ...feed.filter((s) => s !== initial.slug)]);
+  const order = useRef([initial.slug, ...feed.filter((f) => f.slug !== initial.slug).map((f) => f.slug)]);
   // The feed loops both ways: index is any integer, wrapped onto the order.
   const at = useCallback((i: number) => order.current[wrap(i, order.current.length)], []);
   const cache = useRef(new Map<string, Promise<Fact>>([[initial.slug, Promise.resolve(initial)]]));
@@ -74,10 +75,12 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
     return p;
   }, []);
 
-  // Fresh order per visit (the first card stays put).
+  // Fresh order per visit (the first card stays put), spaced so the same faces don't keep coming back.
   useEffect(() => {
-    order.current = [order.current[0], ...lightShuffle(order.current.slice(1))];
-  }, []);
+    const rest = lightShuffle(feed.filter((f) => f.slug !== initial.slug));
+    const seen = [initial.early.id, initial.bridge.id, initial.late.id];
+    order.current = [initial.slug, ...spaceOut(rest, seen).map((f) => f.slug)];
+  }, [feed, initial]);
 
   // Preload the next two bridges (and the previous one) so a swipe never shows an empty circle.
   useEffect(() => {
@@ -258,13 +261,18 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
   return (
     <div
       className="theme-dark fixed inset-0 overflow-hidden bg-paper text-ink"
-      style={{ "--cw": "min(calc(100vw - 32px), 720px, calc((100dvh - 170px) * 0.92))", "--u": "calc(var(--cw) / 1000)" } as CSSProperties}
+      style={{
+        "--cw": "min(calc(100vw - 32px), 720px, calc((100dvh - 170px) * 0.92))",
+        "--u": "calc(var(--cw) / 1000)",
+        // Words grow up to 1.3x when the card is width-bound (phones), never past the height-bound size.
+        "--ut": "max(var(--u), min(calc(var(--u) * 1.3), calc((100dvh - 170px) * 0.92 / 1000)))",
+      } as CSSProperties}
     >
       <header className="absolute inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-rule/40 bg-paper/70 px-4 backdrop-blur-md">
         <Link href="/" className="font-display text-xl" aria-label="Alive At Once, today’s bridge">
           Alive At Once
         </Link>
-        <button type="button" onClick={() => setSheet("menu")} aria-label="Menu" className="-mr-2 rounded-full p-2 hover:bg-paper-2">
+        <button type="button" onClick={() => setSheet("menu")} aria-label="Menu" className="-mr-2 flex h-11 w-11 items-center justify-center rounded-full hover:bg-paper-2">
           <MenuIcon />
         </button>
       </header>
@@ -330,8 +338,12 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
         <ChevronRight className="h-9 w-9" />
       </button>
 
-      {hint && (
-        <p className="fade-up pointer-events-none absolute inset-x-0 top-[4.5rem] z-20 flex justify-center" aria-live="polite">
+      {hint && !flipped && (
+        // Portrait: in the space above the faces. Landscape: under the right-hand arrow, clear of the card.
+        <p
+          className="fade-up pointer-events-none absolute inset-x-0 top-[4.5rem] z-20 flex justify-center [@media(min-aspect-ratio:3/2)]:left-auto [@media(min-aspect-ratio:3/2)]:right-5 [@media(min-aspect-ratio:3/2)]:top-[calc(50%+2.75rem)]"
+          aria-live="polite"
+        >
           <span className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-paper shadow-lg">
             <span className="pointer-coarse:inline hidden">Swipe up for more</span>
             <span className="pointer-coarse:hidden">Scroll or press → for more</span>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cacheLife } from "next/cache";
-import { getFactBySlug, getFeedSlugs } from "@/lib/db";
+import { getFactBySlug, getFeed, getFeedSlugs } from "@/lib/db";
 import { factPath, moments, plainHeadline } from "@/lib/present";
 import { BridgeFeed } from "@/components/feed/BridgeFeed";
 
@@ -31,5 +31,5 @@ export default async function BridgePage({ params }: PageProps<"/b/[slug]">) {
   cacheLife("days");
   const fact = await getFactBySlug((await params).slug);
   if (!fact) notFound();
-  return <BridgeFeed initial={fact} feed={await getFeedSlugs()} />;
+  return <BridgeFeed initial={fact} feed={await getFeed()} />;
 }

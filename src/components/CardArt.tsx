@@ -44,6 +44,15 @@ export const FACES_HEIGHT = BAND + D_BRIDGE + LABEL_GAP + LABEL_HEIGHT;
 export type Unit = (n: number) => number | string;
 export const cssUnit: Unit = (n) => `calc(${+n.toFixed(2)} * var(--u))`;
 export const pxUnit = (scale: number): Unit => (n) => `${+(n * scale).toFixed(2)}px`;
+/**
+ * Live card words. `--ut` lets a width-bound phone card set its headline and
+ * one-liner larger than its geometry (it falls back to `--u`), and small labels
+ * get a px floor. Share images never use these.
+ */
+const textUnit = (n: number) => `calc(${+n.toFixed(2)} * var(--ut, var(--u)))`;
+// The floor only applies as far as `--ut` lifts the card's words, so a height-bound
+// card (landscape, desktop) keeps its proportions.
+const flooredUnit = (u: Unit, floor: number): Unit => (n) => `max(${u(n)}, min(${floor}px, ${textUnit(n)}))`;
 
 type Fonts = { display: string; body: string };
 
@@ -117,6 +126,8 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
   ];
   const top = lifeline ? BAND : 0;
   const height = top + D_BRIDGE + (labels ? LABEL_GAP + LABEL_HEIGHT : 0);
+  // Names and years shrink with the card; on a phone that's ~10px, so floor them live.
+  const small = live ? flooredUnit(u, 12) : u;
   return (
     <div style={{ position: "relative", display: "flex", width: u(1000), height: u(height) }}>
       {/* Paint order = DOM order in Satori (no z-index): bridge last so it sits on top. */}
@@ -147,13 +158,13 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
             >
               <span
                 style={{
-                  fontFamily: fonts.body, fontSize: u(name.length > 22 ? 26 : 30), fontWeight: 600,
+                  fontFamily: fonts.body, fontSize: small(name.length > 22 ? 26 : 30), fontWeight: 600,
                   letterSpacing: "0.06em", textTransform: "uppercase", color: CARD.ink, lineHeight: 1.2,
                 }}
               >
                 {name}
               </span>
-              <span style={{ fontFamily: fonts.body, fontSize: u(30), color: CARD.muted, marginTop: u(6) }}>
+              <span style={{ fontFamily: fonts.body, fontSize: small(30), color: CARD.muted, marginTop: u(6) }}>
                 {lifeYears(p)}
               </span>
             </div>
@@ -185,7 +196,7 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
         >
           <span
             style={{
-              display: "flex", fontFamily: fonts.body, fontSize: u(27), fontWeight: 700, color: CARD.ink,
+              display: "flex", fontFamily: fonts.body, fontSize: small(27), fontWeight: 700, color: CARD.ink,
               background: "rgba(21, 23, 43, 0.82)", padding: `${u(3)} ${u(12)}`, borderRadius: u(30),
               letterSpacing: "0.03em",
             }}
@@ -209,11 +220,13 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
 export function Headline({ text, u, fonts, live, size = 80, as: Tag = "div" }: {
   text: string; u: Unit; fonts: Fonts; live?: boolean; size?: number; as?: "div" | "h1" | "h2";
 }) {
+  const fontSize = size * headlineScale(text);
   const style: CSSProperties = {
-    margin: 0, width: "100%", fontFamily: fonts.display, fontWeight: 400, fontSize: u(size * headlineScale(text)), lineHeight: 1.08,
+    margin: 0, width: "100%", fontFamily: fonts.display, fontWeight: 400, fontSize: live ? textUnit(fontSize) : u(fontSize), lineHeight: 1.08,
     color: CARD.ink, textAlign: "center",
   };
-  const em: CSSProperties = { fontStyle: "italic", color: CARD.bridge };
+  // Gloock's italic overhangs its box: without the pad, "and" runs into the next name.
+  const em: CSSProperties = { fontStyle: "italic", color: CARD.bridge, paddingRight: "0.08em" };
   if (live) {
     return (
       <Tag style={{ ...style, textWrap: "balance" }}>
@@ -232,24 +245,30 @@ export function Headline({ text, u, fonts, live, size = 80, as: Tag = "div" }: {
 
 /**
  * Faces, headline and one-liner, stacked. With `fill`, the card takes its
- * container's height and the faces sit centred in whatever the text leaves.
+ * container's height and the whole stack sits centred in it, so the words stay
+ * next to the faces instead of being pushed to the bottom.
  */
 export function CardArt({ fact, u, fonts, live, portraits, headingTag, fill }: {
   fact: Fact; u: Unit; fonts: Fonts; live?: boolean; portraits?: Record<string, string>; headingTag?: "h1" | "h2"; fill?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: u(1000), ...(fill ? { height: "100%" } : {}) }}>
-      <div style={{ display: "flex", alignItems: "center", ...(fill ? { flex: "1 1 auto", minHeight: 0 } : {}) }}>
+    <div
+      style={{
+        display: "flex", flexDirection: "column", alignItems: "center", width: u(1000),
+        ...(fill ? { height: "100%", justifyContent: "safe center" } : {}),
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", ...(fill ? { flexShrink: 0 } : {}) }}>
         <Faces fact={fact} u={u} fonts={fonts} live={live} portraits={portraits} />
       </div>
-      <div style={{ display: "flex", marginTop: u(36), width: u(1000), ...(fill ? { flexShrink: 0 } : {}) }}>
+      <div style={{ display: "flex", marginTop: u(live ? 48 : 36), width: u(1000), ...(fill ? { flexShrink: 0 } : {}) }}>
         <Headline text={fact.headline} u={u} fonts={fonts} live={live} as={headingTag} />
       </div>
       {fact.oneLiner && (
         <p
           style={{
             display: "flex", justifyContent: "center", margin: 0, marginTop: u(26), maxWidth: u(880),
-            fontFamily: fonts.body, fontSize: u(40), lineHeight: 1.35, color: CARD.muted, textAlign: "center",
+            fontFamily: fonts.body, fontSize: live ? textUnit(40) : u(40), lineHeight: 1.35, color: CARD.muted, textAlign: "center",
           }}
         >
           {fact.oneLiner}

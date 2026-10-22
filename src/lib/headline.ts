@@ -28,7 +28,7 @@ export function checkCopy(s: string | null | undefined, max: number) {
 // shortName is the name a headline uses: the common full form ("Charles Dickens",
 // "King Charles II", "the Queen Mother").
 type Named = { name: string; shortName?: string | null };
-export const shortName = (p: Named) => p.shortName || p.name;
+export const shortName = (p: Named) => p.shortName || labelName(p);
 
 /**
  * The name under a portrait: the full name, minus peerage tails
