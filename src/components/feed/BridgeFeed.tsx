@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProp
 import Link from "next/link";
 import type { Fact } from "@/lib/db";
 import { portraitSources } from "@/lib/photo";
+import { spaceOut, type FeedItem } from "@/lib/feed-order";
 import { factPath, plainHeadline } from "@/lib/present";
 import { CardArt, cssUnit, PORTRAIT_SIZES } from "../CardArt";
 import { CardBack } from "./CardBack";
@@ -46,7 +47,7 @@ function preloadPortraits(f: Fact) {
  * arrows, keys or the wheel (desktop) move through the ranked feed; each card
  * has its own /b/{slug} URL, kept in sync with history.pushState.
  */
-export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; feed: string[]; home?: boolean }) {
+export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; feed: FeedItem[]; home?: boolean }) {
   const [fact, setFact] = useState(initial);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -54,7 +55,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
   const [toast, setToast] = useState<string | null>(null);
   const [hint, setHint] = useState(false);
 
-  const order = useRef([initial.slug, ...feed.filter((s) => s !== initial.slug)]);
+  const order = useRef([initial.slug, ...feed.filter((f) => f.slug !== initial.slug).map((f) => f.slug)]);
   // The feed loops both ways: index is any integer, wrapped onto the order.
   const at = useCallback((i: number) => order.current[wrap(i, order.current.length)], []);
   const cache = useRef(new Map<string, Promise<Fact>>([[initial.slug, Promise.resolve(initial)]]));
@@ -74,10 +75,12 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
     return p;
   }, []);
 
-  // Fresh order per visit (the first card stays put).
+  // Fresh order per visit (the first card stays put), spaced so the same faces don't keep coming back.
   useEffect(() => {
-    order.current = [order.current[0], ...lightShuffle(order.current.slice(1))];
-  }, []);
+    const rest = lightShuffle(feed.filter((f) => f.slug !== initial.slug));
+    const seen = [initial.early.id, initial.bridge.id, initial.late.id];
+    order.current = [initial.slug, ...spaceOut(rest, seen).map((f) => f.slug)];
+  }, [feed, initial]);
 
   // Preload the next two bridges (and the previous one) so a swipe never shows an empty circle.
   useEffect(() => {

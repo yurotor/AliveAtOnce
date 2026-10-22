@@ -17,8 +17,12 @@ import { benchmarkPeople, surpriseFilter } from "./surprise";
 const BRIDGE_POOL = Number(process.env.BRIDGE_POOL ?? 25_000); // who can be the middle person
 const END_POOL = Number(process.env.END_POOL ?? 8_000); // who can be E or L (must be very recognisable)
 const PER_BRIDGE = 3; // keep a few E/L combos per bridge person
+const PER_SIDE = 25; // earlier/later figures considered per bridge person
+const SHORTLIST = 30; // combos per bridge person that go into the global pick
 const MAX_CANDIDATES = Number(process.env.MAX_CANDIDATES ?? 20_000);
-const MAX_APPEARANCES = 300; // stop Eminem from appearing in every single candidate
+// Stop Queen Victoria and Messi from ending every candidate: Jev only scores the
+// top few thousand, so this decides how many different faces the feed can have.
+const MAX_APPEARANCES = Number(process.env.MAX_APPEARANCES ?? 40);
 
 export type Candidate = {
   key: string; // `${bridge}|${early}|${late}`
@@ -46,13 +50,13 @@ function main() {
       .filter((e) => e.bHi < x.bLo && e.dLo !== null && overlaps(e, x))
       .map((e) => ({ p: e, s: famous(e) * (1 + (x.bLo - e.bHi) / 40) }))
       .sort((a, b) => b.s - a.s)
-      .slice(0, 10);
+      .slice(0, PER_SIDE);
     // Later figures born while X was alive, scored by fame × how late they were born.
     const lates = ends
       .filter((l) => l.bLo > x.bHi && overlaps(l, x))
       .map((l) => ({ p: l, s: famous(l) * (1 + (l.bLo - x.bHi) / 40) }))
       .sort((a, b) => b.s - a.s)
-      .slice(0, 10);
+      .slice(0, PER_SIDE);
 
     const combos: Candidate[] = [];
     for (const { p: e } of earlies) {
@@ -70,8 +74,17 @@ function main() {
         combos.push({ key: `${x.id}|${e.id}|${l.id}`, bridge: x.id, early: e.id, late: l.id, gap, heuristic });
       }
     }
+    // Shortlist the best combos, each end at most twice, so it spans many people.
     combos.sort((a, b) => b.heuristic - a.heuristic);
-    out.push(...combos.slice(0, PER_BRIDGE));
+    const uses = new Map<string, number>();
+    let listed = 0;
+    for (const c of combos) {
+      if (listed >= SHORTLIST) break;
+      if ([c.early, c.late].some((id) => (uses.get(id) ?? 0) >= 2)) continue;
+      for (const id of [c.early, c.late]) uses.set(id, (uses.get(id) ?? 0) + 1);
+      out.push(c);
+      listed++;
+    }
   }
 
   // The spec's benchmark bridges must reach Jev if they pass the filters, whatever the heuristic says.
@@ -82,13 +95,18 @@ function main() {
     if (!reject(x, e, l) && !keys.has(key)) out.push({ key, bridge: x.id, early: e.id, late: l.id, gap: l.bLo - e.dHi!, heuristic: Infinity });
   }
 
+  // Global pick, best first: up to PER_BRIDGE per bridge person, MAX_APPEARANCES per end.
+  // Done here rather than per bridge so a capped end makes room for the next-best one.
   out.sort((a, b) => b.heuristic - a.heuristic);
   const seen = new Map<string, number>();
+  const perBridge = new Map<string, number>();
   const kept: Candidate[] = [];
   for (const c of out) {
     if (kept.length >= MAX_CANDIDATES) break;
+    if ((perBridge.get(c.bridge) ?? 0) >= PER_BRIDGE && c.heuristic !== Infinity) continue;
     if ([c.early, c.late].some((id) => (seen.get(id) ?? 0) >= MAX_APPEARANCES)) continue;
     for (const id of [c.early, c.late]) seen.set(id, (seen.get(id) ?? 0) + 1);
+    perBridge.set(c.bridge, (perBridge.get(c.bridge) ?? 0) + 1);
     kept.push(c);
   }
 
