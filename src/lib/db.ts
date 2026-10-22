@@ -264,3 +264,59 @@ export async function getPhotoCredits() {
   )) as PersonRow[];
   return rows.map(toPerson);
 }
+
+export type QuizQuestion = { fact: Fact; options: Person[] };
+
+function shuffle<T>(xs: T[]) {
+  const out = [...xs];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * `n` random feed bridges, each with its bridge hidden among three near misses:
+ * famous people born just after the earlier figure died ("young") or who died
+ * just before the later one was born ("old"). They look right, and certainly
+ * aren't. Same field as the bridge ranks higher. Nobody appears twice in a quiz.
+ */
+export async function getQuiz(n = 5): Promise<QuizQuestion[]> {
+  const facts = ((await sql.query(
+    `${FACT_SELECT} WHERE f.active AND f.feed AND b.photo IS NOT NULL AND e.photo IS NOT NULL AND l.photo IS NOT NULL
+     ORDER BY random() LIMIT $1`,
+    [n * 3],
+  )) as FactRow[]).map(toFact);
+  const near = (kind: string, where: string) => `
+    (SELECT '${kind}' AS kind, ${PERSON_COLS} FROM people p
+     WHERE p.photo IS NOT NULL AND p.rank <= 5000 AND p.id NOT IN (f.bridge_id, f.early_id, f.late_id) AND ${where}
+     ORDER BY p.rank * (CASE WHEN p.field = b.field THEN 0.4 ELSE 1 END) LIMIT 6)`;
+  const rows = (await sql.query(
+    `SELECT f.id AS fact_id, row_to_json(x) AS person
+     FROM facts f JOIN people b ON b.id = f.bridge_id JOIN people e ON e.id = f.early_id JOIN people l ON l.id = f.late_id
+     CROSS JOIN LATERAL (
+       ${near("young", "p.b_lo > e.d_hi AND p.b_lo < e.d_hi + 30 AND (p.d_lo IS NULL OR p.d_lo > l.b_hi)")}
+       UNION ALL
+       ${near("old", "p.d_hi < l.b_lo AND p.d_hi > l.b_lo - 30 AND p.b_hi < e.d_lo")}
+     ) x
+     WHERE f.id = ANY($1)`,
+    [facts.map((f) => f.id)],
+  )) as { fact_id: number; person: PersonRow & { kind: "young" | "old" } }[];
+
+  const used = new Set<string>();
+  const out: QuizQuestion[] = [];
+  for (const fact of facts) {
+    const ids = [fact.early.id, fact.bridge.id, fact.late.id];
+    if (ids.some((id) => used.has(id))) continue;
+    const pool = rows.filter((r) => r.fact_id === fact.id && !used.has(r.person.id));
+    // Alternate the two kinds of near miss, so a question can't be solved by era alone.
+    const [a, b] = shuffle(["young", "old"]).map((k) => shuffle(pool.filter((r) => r.person.kind === k)));
+    const picks = [a[0], b[0], a[1], b[1], ...a.slice(2), ...b.slice(2)].filter(Boolean).slice(0, 3).map((r) => toPerson(r.person));
+    if (picks.length < 3) continue;
+    [...ids, ...picks.map((p) => p.id)].forEach((id) => used.add(id));
+    out.push({ fact, options: shuffle([fact.bridge, ...picks]) });
+    if (out.length === n) break;
+  }
+  return out;
+}

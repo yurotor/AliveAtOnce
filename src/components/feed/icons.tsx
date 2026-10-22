@@ -12,6 +12,12 @@ export const ChevronRight = ({ className }: P) => <svg {...base} className={clas
 export const ShareIcon = ({ className }: P) => (
   <svg {...base} className={className}><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6" /></svg>
 );
+export const QuizIcon = ({ className }: P) => (
+  <svg {...base} className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17h.01" />
+  </svg>
+);
 export const MenuIcon = ({ className }: P) => <svg {...base} className={className}><path d="M4 7h16M4 12h16M4 17h16" /></svg>;
 export const CloseIcon = ({ className }: P) => <svg {...base} className={className}><path d="M6 6l12 12M18 6L6 18" /></svg>;
 export const LinkIcon = ({ className }: P) => (

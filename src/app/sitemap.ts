@@ -17,6 +17,7 @@ export default async function sitemap(props: { id: Promise<string> }): Promise<M
     return [
       { url: SITE_URL, changeFrequency: "daily", priority: 1 },
       { url: `${SITE_URL}/search` },
+      { url: `${SITE_URL}/quiz` },
       { url: `${SITE_URL}/about` },
       { url: `${SITE_URL}/collections` },
       ...COLLECTIONS.map((c) => ({ url: `${SITE_URL}/collections/${c.slug}` })),

@@ -110,9 +110,28 @@ export function Portrait({ person, size, u, live, src, ring, priority }: {
   );
 }
 
-/** The faces row: endpoint, bridge, endpoint, overlapping, on a lifeline with the overlap years. */
-export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline = true }: {
-  fact: Fact; u: Unit; fonts: Fonts; live?: boolean; portraits?: Record<string, string>; labels?: boolean; lifeline?: boolean;
+/** The hidden bridge in a quiz question: an empty circle with a question mark. */
+function Mystery({ size, u, fonts }: { size: number; u: Unit; fonts: Fonts }) {
+  return (
+    <div
+      role="img"
+      aria-label="Who?"
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "center", width: u(size), height: u(size), borderRadius: "50%",
+        background: "#1d2038", border: `${u(5)} dashed ${CARD.bridge}`,
+      }}
+    >
+      <span style={{ fontFamily: fonts.display, fontSize: u(size * 0.5), lineHeight: 1, color: CARD.bridge }}>?</span>
+    </div>
+  );
+}
+
+/**
+ * The faces row: endpoint, bridge, endpoint, overlapping, on a lifeline with the overlap years.
+ * `mystery` hides the bridge (the quiz).
+ */
+export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline = true, mystery = false }: {
+  fact: Fact; u: Unit; fonts: Fonts; live?: boolean; portraits?: Record<string, string>; labels?: boolean; lifeline?: boolean; mystery?: boolean;
 }) {
   const people = [fact.early, fact.bridge, fact.late];
   const m = moments(fact);
@@ -147,9 +166,11 @@ export function Faces({ fact, u, fonts, live, portraits, labels = true, lifeline
               ...(i === 1 ? { boxShadow: `0 0 0 ${u(10)} ${CARD.bg}` } : {}),
             }}
           >
-            <Portrait person={p} size={SIZES[i]} u={u} live={live} src={portraits?.[p.id]} ring={rings[i]} priority={i === 1} />
+            {i === 1 && mystery
+              ? <Mystery size={SIZES[i]} u={u} fonts={fonts} />
+              : <Portrait person={p} size={SIZES[i]} u={u} live={live} src={portraits?.[p.id]} ring={rings[i]} priority={i === 1} />}
           </div>
-          {labels && (
+          {labels && !(i === 1 && mystery) && (
             <div
               style={{
                 display: "flex", flexDirection: "column", alignItems: "center", marginTop: u(LABEL_GAP),

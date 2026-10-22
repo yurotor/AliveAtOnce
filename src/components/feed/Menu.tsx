@@ -25,6 +25,10 @@ export function Menu({ onClose }: { onClose: () => void }) {
             <p className="mb-2 font-display text-2xl">Find a person</p>
             <Search placeholder="Einstein, Cleopatra, Beyoncé…" />
           </div>
+          <Link href="/quiz" className={item} onClick={onClose}>
+            <span className="block font-display text-2xl">Quiz</span>
+            <span className="block text-sm text-muted">Five bridges, the middle face hidden. Who was it?</span>
+          </Link>
           <Link href="/collections" className={item} onClick={onClose}>
             <span className="block font-display text-2xl">Collections</span>
             <span className="block text-sm text-muted">Science to pop culture, same birthday, just in time</span>

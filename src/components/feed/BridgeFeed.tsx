@@ -10,7 +10,7 @@ import { CardArt, cssUnit, PORTRAIT_SIZES } from "../CardArt";
 import { CardBack } from "./CardBack";
 import { Menu } from "./Menu";
 import { ShareSheet } from "./ShareSheet";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, MenuIcon, ShareIcon } from "./icons";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, MenuIcon, QuizIcon, ShareIcon } from "./icons";
 
 const FONTS = { display: "var(--font-gloock), Georgia, serif", body: "var(--font-hanken), system-ui, sans-serif" };
 const HINT_KEY = "aao:swiped";
@@ -300,7 +300,7 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
           </div>
         </div>
 
-        <nav aria-label="Bridge controls" className="flex items-center gap-3 pb-5 pt-2">
+        <nav aria-label="Bridge controls" className="flex items-center gap-2 pb-5 pt-2 sm:gap-3">
           <button type="button" className={round} onClick={() => go(-1)} aria-label="Previous bridge">
             <ChevronUp className="sm:hidden" />
             <ChevronLeft className="hidden sm:block" />
@@ -309,8 +309,12 @@ export function BridgeFeed({ initial, feed, home = false }: { initial: Fact; fee
             {flipped ? "back" : "how?"}
           </button>
           <button type="button" className={pill} onClick={() => setSheet("share")}>
-            <ShareIcon className="h-5 w-5" /> Share
+            <ShareIcon className="h-5 w-5" /> <span className="max-[359px]:sr-only">Share</span>
           </button>
+          {/* Icon-only on phones, where five controls barely fit. */}
+          <Link href="/quiz" className={`${round} sm:w-auto sm:gap-2 sm:px-5 sm:text-sm sm:font-medium`} aria-label="Quiz">
+            <QuizIcon className="h-5 w-5" /> <span className="hidden sm:inline">Quiz</span>
+          </Link>
           <button type="button" className={round} onClick={() => go(1)} aria-label="Next bridge">
             <ChevronDown className="sm:hidden" />
             <ChevronRight className="hidden sm:block" />

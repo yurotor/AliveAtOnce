@@ -10,6 +10,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         </Link>
         <nav className="flex gap-5 text-sm text-muted">
           <Link href="/search" className="hover:text-ink">Find a person</Link>
+          <Link href="/quiz" className="hover:text-ink">Quiz</Link>
           <Link href="/collections" className="hover:text-ink">Collections</Link>
           <Link href="/about" className="hover:text-ink">About</Link>
         </nav>
