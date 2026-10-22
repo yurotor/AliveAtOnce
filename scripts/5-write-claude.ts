@@ -1,51 +1,78 @@
 /**
- * Step 3 — Claude writes a punchy one-liner for each top-scored bridge.
+ * Step 5 — Claude writes the words on each card: a headline (≤ 40 chars), an
+ * optional one-liner (≤ 90 chars), and the short name people know each person
+ * by ("Picasso", "Darwin"). See the homepage spec, "Headline rules".
  *
  * Picks the top TOP_FACTS by Jev score (with a diversity cap so the same few
- * names don't dominate — see selectFacts), then asks Claude in batches of 20. Claude only gets
- * the dates we computed, and is told not to add any outside facts.
+ * names don't dominate — see selectFacts). Feed bridges (Jev 8+, the ones that
+ * rotate as the daily bridge) are written by FEATURED_MODEL (Sonnet); the rest,
+ * shown only on person pages, by BULK_MODEL (Haiku). Batches of 20. Claude only
+ * gets the dates we computed and is told not to add outside facts; anything over
+ * the length limits or using banned words is dropped and the template is used.
  *
- * Resumable: lines cached in data/lines.json.
- * WRITER_MODEL defaults to Sonnet; set WRITER_MODEL=anthropic/claude-haiku-5.5 for cheap drafts.
+ * Resumable: data/writing.json (per bridge) and data/short-names.json (per person).
+ * Needs ANTHROPIC_API_KEY (direct), or AI_GATEWAY_API_KEY / VERCEL_OIDC_TOKEN for Vercel AI Gateway.
  */
-import { generateText, Output } from "ai";
+import { generateText, Output, type LanguageModel } from "ai";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { readJSON, writeJSON, pool, ageAt, selectFacts, type Person } from "./lib";
+import { FEED_MIN_SURPRISE, checkCopy, HEADLINE_MAX, ONE_LINER_MAX } from "../src/lib/headline";
 import type { Candidate } from "./3-candidates";
 import type { Score } from "./4-score-jev";
 
-const MODEL = process.env.WRITER_MODEL ?? "anthropic/claude-sonnet-5.5";
+const DIRECT = !!process.env.ANTHROPIC_API_KEY;
+const FEATURED_MODEL = process.env.FEATURED_MODEL ?? (DIRECT ? "claude-sonnet-5-5" : "anthropic/claude-sonnet-5.5");
+const BULK_MODEL = process.env.BULK_MODEL ?? (DIRECT ? "claude-haiku-5-5" : "anthropic/claude-haiku-5.5");
+const anthropic = DIRECT ? createAnthropic() : null;
+const modelFor = (id: string): LanguageModel => (anthropic ? anthropic(id) : id);
 const TOP_FACTS = Number(process.env.TOP_FACTS ?? 3000);
 const BATCH = 20;
 
-const SYSTEM = `You write one-liners for "Alive At Once" (aliveatonce.app), a site about surprising lifetime overlaps between famous people.
+export type Writing = { headline: string | null; oneLiner: string | null; model: string };
 
-For each fact you get a bridge person whose life overlapped both an earlier and a later figure who never overlapped each other, plus the bridge person's age at the key moments.
+const SYSTEM = `You write the words on share cards for "Alive At Once" (aliveatonce.app), a site about surprising lifetime overlaps between famous people.
 
-Write ONE line per fact:
-- Under 120 characters. Punchy, conversational, made to be shared.
-- Lead with the bridge person; land the twist on the later figure.
-- Use ONLY the names, dates and ages given. Never add other facts, events or claims.
-- If an age is given as "a baby"/"a newborn"/"N months old", you may use it; otherwise you may round ages, never invent them.
-- No hashtags, no emoji, no "Did you know", no exclamation marks.
-- Vary the phrasing across lines.
+Each card shows three faces: an EARLIER person, a BRIDGE person whose life overlapped both, and a LATER person born after the earlier one died. You get each person's dates and the bridge person's age at the two key moments.
 
-Examples of the tone:
-- Picasso was a baby when Darwin died — and still alive when Eminem was born.
-- Queen Victoria was born while Napoleon was alive. Hitler was 11 when she died.
-- One lifetime: Mark Twain was born under James Madison and died after John Wayne was born.`;
+For each card write:
+
+1. shortNames: the short, commonly known name for each of the three people, the way a headline would say it ("Picasso", "Darwin", "Eminem", "Queen Victoria", "Napoleon", "Lincoln"). It must be part of their full name, or the full name itself if nothing shorter is widely used. If the short form would be ambiguous with another famous person (Jackson, Jones, Johnson, Ford, Bush, Adams, Roosevelt), keep enough of the name to be unambiguous ("Michael Jackson").
+
+2. headline: the shortest line that states the bridge, grammatically correct, with a slight street edge.
+   - Default shape: "{Bridge} caught {Earlier} *and* {Later}." Write it like that unless you have something clearly better.
+   - At most ${HEADLINE_MAX} characters (not counting asterisks). Wrap the word "and" in asterisks (*and*) when it joins the two names.
+   - Use the short names. Factually accurate: "caught" or "was alive with" only. Never say someone lived in another person's era or time, because the overlap may be months.
+   - No heavy slang ("no cap", "fr", "lowkey"), no emoji, no hashtags.
+
+3. oneLiner: one punchy line, at most ${ONE_LINER_MAX} characters, that lands the twist with the actual ages, e.g. "He was a baby when Darwin died, and 90 when Eminem was born." Optional: return "" if nothing good fits.
+   - Use ONLY the names, dates and ages given. Never add other facts, events, nicknames or claims.
+   - If an age is given as "a baby", "a newborn" or "N months old" you may use it; otherwise round, never invent.
+   - At most one exclamation mark, most lines need none. No emoji, no "Did you know".
+   - Joke about the timeline, never the person. When someone is tied to war, atrocity or tragedy, keep the surprise and drop the cheek.
+   - Vary the structure across cards.`;
 
 const schema = z.object({
-  lines: z.array(z.object({ id: z.number().describe("the fact id"), line: z.string() })),
+  cards: z.array(z.object({
+    id: z.number().describe("the card id"),
+    shortNames: z.object({ bridge: z.string(), earlier: z.string(), later: z.string() }),
+    headline: z.string(),
+    oneLiner: z.string(),
+  })),
 });
 
+/** Only accept a short name that is part of the full name (accents ignored). */
+const fold = (s: string) => s.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const validShort = (short: string, p: Person) => short.length > 1 && short.length <= 24 && fold(p.name).includes(fold(short.trim()));
+
 async function main() {
-  if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
-    throw new Error("Set AI_GATEWAY_API_KEY in .env.local (Vercel dashboard → AI Gateway → API Keys).");
+  if (!DIRECT && !process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
+    throw new Error("Set ANTHROPIC_API_KEY (or AI_GATEWAY_API_KEY) in .env.local.");
   }
   const people = new Map(readJSON<Person[]>("people.json").map((p) => [p.id, p]));
   const scores = readJSON<Record<string, Score>>("scores.json");
-  const lines = readJSON<Record<string, string>>("lines.json", {});
+  const writing = readJSON<Record<string, Writing>>("writing.json", {});
+  const shortNames = readJSON<Record<string, string>>("short-names.json", {});
 
   const ranked = readJSON<Candidate[]>("candidates.json")
     .filter((c) => scores[c.key])
@@ -53,14 +80,17 @@ async function main() {
   const chosen = selectFacts(ranked, TOP_FACTS);
   writeJSON("chosen.json", chosen.map((c) => c.key));
 
-  const todo = chosen.filter((c) => !lines[c.key]);
-  console.log(`${chosen.length} facts chosen, ${todo.length} need lines (${MODEL})`);
-  const batches: Candidate[][] = [];
-  for (let i = 0; i < todo.length; i += BATCH) batches.push(todo.slice(i, i + BATCH));
+  const todo = chosen.filter((c) => !writing[c.key]);
+  const featured = (c: Candidate) => scores[c.key].surprise >= FEED_MIN_SURPRISE;
+  console.log(`${chosen.length} facts chosen (${chosen.filter(featured).length} feed), ${todo.length} to write`);
+  const batches: { model: string; facts: Candidate[] }[] = [];
+  for (const [model, list] of [[FEATURED_MODEL, todo.filter(featured)], [BULK_MODEL, todo.filter((c) => !featured(c))]] as const) {
+    for (let i = 0; i < list.length; i += BATCH) batches.push({ model, facts: list.slice(i, i + BATCH) });
+  }
 
-  let done = 0;
-  await pool(batches, 4, async (batch) => {
-    const facts = batch.map((c, id) => {
+  let done = 0, dropped = 0;
+  await pool(batches, 4, async ({ model, facts }) => {
+    const cards = facts.map((c, id) => {
       const [x, e, l] = [c.bridge, c.early, c.late].map((pid) => people.get(pid)!);
       return {
         id,
@@ -73,25 +103,35 @@ async function main() {
     });
     try {
       const { output } = await generateText({
-        model: MODEL,
+        model: modelFor(model),
         system: SYSTEM,
-        prompt: `Write one line for each of these ${facts.length} facts. Return every id.\n\n${JSON.stringify(facts, null, 1)}`,
+        prompt: `Write the words for each of these ${cards.length} cards. Return every id.\n\n${JSON.stringify(cards, null, 1)}`,
         output: Output.object({ schema }),
       });
-      for (const { id, line } of output.lines) {
-        if (batch[id] && line.length <= 160) lines[batch[id].key] = line.trim();
+      for (const card of output.cards) {
+        const c = facts[card.id];
+        if (!c) continue;
+        const [x, e, l] = [c.bridge, c.early, c.late].map((pid) => people.get(pid)!);
+        for (const [p, short] of [[x, card.shortNames.bridge], [e, card.shortNames.earlier], [l, card.shortNames.later]] as const) {
+          if (!shortNames[p.id] && validShort(short, p)) shortNames[p.id] = short.trim();
+        }
+        const headline = checkCopy(card.headline, HEADLINE_MAX);
+        const oneLiner = checkCopy(card.oneLiner, ONE_LINER_MAX);
+        if (!headline) dropped++;
+        writing[c.key] = { headline, oneLiner, model };
       }
     } catch (err) {
       console.warn(`  batch failed: ${(err as Error).message}`);
     }
-    done += batch.length;
-    writeJSON("lines.json", lines);
+    done += facts.length;
+    writeJSON("writing.json", writing);
+    writeJSON("short-names.json", shortNames);
     console.log(`${done}/${todo.length}`);
   });
 
-  const missing = chosen.filter((c) => !lines[c.key]).length;
-  console.log(`Done. ${chosen.length - missing} lines written${missing ? `, ${missing} missing (re-run to retry)` : ""}.`);
-  for (const c of chosen.slice(0, 8)) console.log(`  • ${lines[c.key]}`);
+  const missing = chosen.filter((c) => !writing[c.key]).length;
+  console.log(`Done. ${chosen.length - missing} written${missing ? `, ${missing} missing (re-run to retry)` : ""}, ${dropped} headlines over limit (template used).`);
+  for (const c of chosen.slice(0, 10)) console.log(`  • ${writing[c.key]?.headline} — ${writing[c.key]?.oneLiner}`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

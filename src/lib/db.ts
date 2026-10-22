@@ -1,6 +1,8 @@
 import { neon } from "@neondatabase/serverless";
 import { cacheLife } from "next/cache";
 import type { Life } from "./life";
+import type { Photo } from "./photo";
+import { templateHeadline } from "./headline";
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -11,11 +13,18 @@ export type Person = Life & {
   image: string | null;
   wiki: string | null;
   rank: number;
+  shortName: string | null;
+  field: string | null;
+  photo: Photo | null;
 };
 
 export type Fact = {
   id: number;
-  line: string | null;
+  slug: string;
+  /** Claude's headline or the template; *and* marks italics. */
+  headline: string;
+  oneLiner: string | null;
+  surprise: number | null;
   score: number;
   gap: number;
   bridge: Person;
@@ -23,11 +32,12 @@ export type Fact = {
   late: Person;
 };
 
-const PERSON_COLS = `id, slug, name, description, born_label, died_label, b_lo, b_hi, d_lo, d_hi, image, wiki, rank`;
+const PERSON_COLS = `id, slug, name, description, born_label, died_label, b_lo, b_hi, d_lo, d_hi, image, wiki, rank, short_name, field, photo`;
 
 type PersonRow = {
   id: string; slug: string; name: string; description: string; born_label: string; died_label: string | null;
   b_lo: number; b_hi: number; d_lo: number | null; d_hi: number | null; image: string | null; wiki: string | null; rank: number;
+  short_name: string | null; field: string | null; photo: Photo | null;
 };
 
 const toPerson = (r: PersonRow): Person => ({
@@ -35,55 +45,50 @@ const toPerson = (r: PersonRow): Person => ({
   bornLabel: r.born_label, diedLabel: r.died_label,
   bLo: r.b_lo, bHi: r.b_hi, dLo: r.d_lo, dHi: r.d_hi,
   image: r.image, wiki: r.wiki, rank: r.rank,
+  shortName: r.short_name, field: r.field, photo: r.photo,
 });
 
 /** Facts with all three people joined, as one JSON row each. */
 const FACT_SELECT = `
-  SELECT f.id, f.line, f.score, f.gap,
+  SELECT f.id, f.slug, f.headline, f.one_liner, f.surprise, f.score, f.gap,
     row_to_json(b) AS bridge, row_to_json(e) AS early, row_to_json(l) AS late
   FROM facts f
   JOIN (SELECT ${PERSON_COLS} FROM people) b ON b.id = f.bridge_id
   JOIN (SELECT ${PERSON_COLS} FROM people) e ON e.id = f.early_id
   JOIN (SELECT ${PERSON_COLS} FROM people) l ON l.id = f.late_id`;
 
-type FactRow = { id: number; line: string | null; score: number; gap: number; bridge: PersonRow; early: PersonRow; late: PersonRow };
-const toFact = (r: FactRow): Fact => ({
-  id: r.id, line: r.line, score: r.score, gap: r.gap,
-  bridge: toPerson(r.bridge), early: toPerson(r.early), late: toPerson(r.late),
-});
+type FactRow = {
+  id: number; slug: string; headline: string | null; one_liner: string | null; surprise: number | null; score: number; gap: number;
+  bridge: PersonRow; early: PersonRow; late: PersonRow;
+};
+const toFact = (r: FactRow): Fact => {
+  const [bridge, early, late] = [r.bridge, r.early, r.late].map(toPerson);
+  return {
+    id: r.id, slug: r.slug, headline: r.headline ?? templateHeadline(bridge, early, late), oneLiner: r.one_liner,
+    surprise: r.surprise, score: r.score, gap: r.gap, bridge, early, late,
+  };
+};
 
 const LAUNCH = Date.UTC(2026, 9, 22); // day 0 of the daily rotation
 
-/** Today's bridge (UTC day) plus the date it's for. */
+/** Today's bridge (UTC day) plus the date it's for. Rotates through the homepage feed. */
 export async function getDailyFact() {
   "use cache";
   cacheLife("hours");
   const day = Math.floor((Date.now() - LAUNCH) / 86_400_000);
-  const [{ n }] = (await sql.query(`SELECT count(*)::int AS n FROM facts WHERE active`)) as { n: number }[];
+  const [{ n }] = (await sql.query(`SELECT count(*)::int AS n FROM facts WHERE active AND daily_order IS NOT NULL`)) as { n: number }[];
   if (!n) return null;
   const pos = ((day % n) + n) % n;
   const rows = (await sql.query(`${FACT_SELECT} WHERE f.daily_order = $1`, [pos])) as FactRow[];
   return rows[0] ? { fact: toFact(rows[0]), date: new Date(LAUNCH + day * 86_400_000).toISOString() } : null;
 }
 
-/** The best bridges overall, skipping one (today's), with no early/late figure repeated. */
-export async function getTopFacts(excludeId: number | null, limit = 12) {
+/** Every homepage-feed bridge's slug, best first. The client shuffles lightly. */
+export async function getFeedSlugs() {
   "use cache";
   cacheLife("hours");
-  const rows = (await sql.query(
-    `${FACT_SELECT} WHERE f.active AND f.id <> $1 ORDER BY f.score DESC LIMIT $2`,
-    [excludeId ?? -1, limit * 8],
-  )) as FactRow[];
-  const seen = new Set<string>();
-  const out: Fact[] = [];
-  for (const f of rows.map(toFact)) {
-    const ids = [f.bridge.id, f.early.id, f.late.id];
-    if (ids.some((id) => seen.has(id))) continue;
-    ids.forEach((id) => seen.add(id));
-    out.push(f);
-    if (out.length === limit) break;
-  }
-  return out;
+  const rows = (await sql.query(`SELECT slug FROM facts WHERE active AND feed ORDER BY score DESC, id`)) as { slug: string }[];
+  return rows.map((r) => r.slug);
 }
 
 export async function getFact(id: number) {
@@ -91,6 +96,68 @@ export async function getFact(id: number) {
   cacheLife("days");
   const rows = (await sql.query(`${FACT_SELECT} WHERE f.id = $1`, [id])) as FactRow[];
   return rows[0] ? toFact(rows[0]) : null;
+}
+
+export async function getFactBySlug(slug: string) {
+  "use cache";
+  cacheLife("days");
+  const rows = (await sql.query(`${FACT_SELECT} WHERE f.slug = $1`, [slug])) as FactRow[];
+  return rows[0] ? toFact(rows[0]) : null;
+}
+
+export type Collection = { slug: string; title: string; blurb: string };
+
+export const COLLECTIONS: Collection[] = [
+  { slug: "science-to-pop-culture", title: "Science to pop culture", blurb: "A scientist at one end, a pop star or athlete at the other." },
+  { slug: "just-in-time", title: "Just in time", blurb: "Lives that overlapped by less than a year." },
+  { slug: "same-birthday", title: "Same birthday", blurb: "Famous people born on the very same day." },
+];
+
+/** Bridges for a collection, best first. */
+export async function getCollectionFacts(slug: string, limit = 24) {
+  "use cache";
+  cacheLife("days");
+  const where: Record<string, string> = {
+    "science-to-pop-culture": `e.field = 'science' AND l.field IN ('music', 'screen', 'sport')`,
+    // Under a year between the bridge's birth and the early figure's death, or the late figure's birth and the bridge's death.
+    "just-in-time": `(e.d_lo - b.b_hi < 1 OR (b.d_lo IS NOT NULL AND b.d_lo - l.b_hi < 1))`,
+  };
+  if (!where[slug]) return [];
+  const rows = (await sql.query(
+    `${FACT_SELECT} WHERE f.active AND b.photo IS NOT NULL AND e.photo IS NOT NULL AND l.photo IS NOT NULL AND ${where[slug]}
+     ORDER BY f.feed DESC, f.score DESC LIMIT $1`,
+    [limit * 4],
+  )) as FactRow[];
+  return diverse(rows.map(toFact), limit);
+}
+
+/** Pairs of famous people born on the same day (both dates known to the day). */
+export async function getSameBirthdays(limit = 24) {
+  "use cache";
+  cacheLife("days");
+  const rows = (await sql.query(
+    `SELECT row_to_json(a) AS a, row_to_json(b) AS b FROM
+       (SELECT ${PERSON_COLS} FROM people WHERE rank <= 6000 AND born_label ~ '^\d+ ') a
+     JOIN (SELECT ${PERSON_COLS} FROM people WHERE rank <= 6000) b
+       ON b.born_label = a.born_label AND b.rank > a.rank
+     ORDER BY greatest(a.rank, b.rank) LIMIT $1`,
+    [limit],
+  )) as { a: PersonRow; b: PersonRow }[];
+  return rows.map((r) => [toPerson(r.a), toPerson(r.b)] as const);
+}
+
+/** Keep the first bridge per person, so a grid isn't ten Eminems. */
+function diverse(facts: Fact[], limit: number) {
+  const seen = new Set<string>();
+  const out: Fact[] = [];
+  for (const f of facts) {
+    const ids = [f.bridge.id, f.early.id, f.late.id];
+    if (ids.some((id) => seen.has(id))) continue;
+    ids.forEach((id) => seen.add(id));
+    out.push(f);
+    if (out.length === limit) break;
+  }
+  return out;
 }
 
 export async function getPerson(slug: string) {
@@ -104,7 +171,7 @@ export async function getFactsFor(personId: string) {
   "use cache";
   cacheLife("days");
   const rows = (await sql.query(
-    `${FACT_SELECT} WHERE f.active AND $1 IN (f.bridge_id, f.early_id, f.late_id) ORDER BY f.score DESC LIMIT 8`,
+    `${FACT_SELECT} WHERE f.active AND $1 IN (f.bridge_id, f.early_id, f.late_id) ORDER BY f.feed DESC, f.score DESC LIMIT 8`,
     [personId],
   )) as FactRow[];
   return rows.map(toFact);
@@ -169,8 +236,20 @@ export async function getSitemapPage(page: number, size: number) {
   )) as { slug: string }[];
 }
 
-export async function getFactIds() {
+export async function getFactSlugs() {
   "use cache";
   cacheLife("days");
-  return ((await sql.query(`SELECT id FROM facts WHERE active ORDER BY score DESC`)) as { id: number }[]).map((r) => r.id);
+  return ((await sql.query(`SELECT slug FROM facts WHERE active ORDER BY feed DESC, score DESC`)) as { slug: string }[]).map((r) => r.slug);
+}
+
+/** Everyone whose Commons portrait appears on a card, A–Z. */
+export async function getPhotoCredits() {
+  "use cache";
+  cacheLife("days");
+  const rows = (await sql.query(
+    `SELECT ${PERSON_COLS} FROM people p
+     WHERE photo IS NOT NULL AND EXISTS (SELECT 1 FROM facts f WHERE f.active AND p.id IN (f.bridge_id, f.early_id, f.late_id))
+     ORDER BY name`,
+  )) as PersonRow[];
+  return rows.map(toPerson);
 }

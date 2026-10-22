@@ -8,9 +8,9 @@ export default function About() {
     <article className="pt-10 sm:pt-16 max-w-prose space-y-5 leading-relaxed">
       <h1 className="font-display text-5xl mb-8">About</h1>
       <p>
-        Alive At Once is about the surprising ways famous lives overlapped. Pablo Picasso was alive at the
-        same time as Charles Darwin, and he was still alive when Eminem was born. One lifetime can span
-        worlds that feel centuries apart.
+        Alive At Once is about the surprising ways famous lives overlapped. Pablo Picasso was born six months
+        before Charles Darwin died, and he was still alive when Eminem was born. One lifetime can span worlds
+        that feel centuries apart.
       </p>
       <h2 className="font-display text-2xl pt-4">Where the dates come from</h2>
       <p>
@@ -22,8 +22,17 @@ export default function About() {
       <h2 className="font-display text-2xl pt-4">How bridges are picked</h2>
       <p>
         A bridge is one life that overlapped two people who never overlapped each other. We generate
-        candidates from the data, an AI model rates how surprising each one is, and another writes the
-        one-line summary using only the dates shown.
+        candidates from the data and drop the predictable ones: the two outer people must have lived at
+        least a century apart, come from different fields, be widely known, and have no teacher, student or
+        family link. An AI model (Jev) then rates how surprising each one is, and only the most surprising
+        reach the homepage. Claude writes the headline and one-liner using only the dates shown.
+      </p>
+      <h2 className="font-display text-2xl pt-4" id="credits">Portraits</h2>
+      <p>
+        Portraits come from <a className="underline" href="https://commons.wikimedia.org">Wikimedia Commons</a>,
+        via each person’s Wikidata entry, under their own licences. We crop them to the face and tint them by
+        era: sepia before 1850, black and white to 1950, colour after. See the{" "}
+        <Link href="/credits" className="underline">photo credits</Link>.
       </p>
       <p>Spotted a wrong date? Fix it on Wikidata and it will flow through on the next update.</p>
       <p>

@@ -6,7 +6,7 @@
  * language editions and usable (day/month/year precision, consistent) dates.
  */
 import { writeFileSync } from "node:fs";
-import { dataPath, sleep, writeJSON, type Person } from "./lib";
+import { dataPath, sleep, slugify, writeJSON, type Person } from "./lib";
 
 const MIN_SITELINKS = Number(process.env.MIN_SITELINKS ?? 20);
 const ENDPOINT = "https://qlever.dev/api/wikidata";
@@ -87,16 +87,6 @@ function unquote(s: string | undefined) {
   return (m ? m[1] : s).replace(/\\"/g, '"').replace(/\\\\/g, "\\");
 }
 const unIri = (s: string | undefined) => (s ? s.replace(/^<|>$/g, "") : "");
-
-export function slugify(s: string) {
-  return s
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
 
 async function main() {
   console.log(`Querying QLever for humans with ≥${MIN_SITELINKS} sitelinks…`);

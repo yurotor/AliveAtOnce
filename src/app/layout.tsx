@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import type { Metadata, Viewport } from "next";
 import { Gloock, Hanken_Grotesk } from "next/font/google";
-import { SITE, SITE_URL } from "@/lib/present";
+import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/present";
 import "./globals.css";
+import "./card.css";
 
 const gloock = Gloock({ variable: "--font-gloock", weight: "400", subsets: ["latin"] });
 const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"] });
@@ -14,33 +15,19 @@ export const metadata: Metadata = {
     template: "%s · Alive At Once",
   },
   description:
-    "Surprising lifetime overlaps between famous people. Picasso was alive at the same time as Darwin — and Eminem.",
+    "Surprising lifetime overlaps between famous people. Picasso caught Darwin and Eminem.",
   openGraph: { siteName: "Alive At Once", type: "website" },
   twitter: { card: "summary_large_image" },
 };
 
+export const viewport: Viewport = { themeColor: "#15172b", viewportFit: "cover" };
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${gloock.variable} ${hanken.variable}`}>
-      <body className="min-h-dvh flex flex-col bg-paper text-ink">
-        <header className="mx-auto w-full max-w-5xl px-4 sm:px-6 pt-5 pb-2 flex items-baseline justify-between gap-4">
-          <Link href="/" className="font-display text-xl no-underline">
-            Alive At Once
-          </Link>
-          <nav className="flex gap-5 text-sm text-muted">
-            <Link href="/search" className="hover:text-ink">Find a person</Link>
-            <Link href="/about" className="hover:text-ink">About</Link>
-          </nav>
-        </header>
-        <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 flex-1">{children}</main>
-        <footer className="mx-auto w-full max-w-5xl px-4 sm:px-6 mt-16">
-          <div className="py-10 border-t border-rule text-sm text-muted flex flex-wrap gap-x-6 gap-y-2">
-            <span>{SITE}</span>
-            <span>Dates from Wikidata (CC0). Portraits from Wikimedia Commons.</span>
-            <Link href="/privacy" className="hover:text-ink">Privacy</Link>
-            <Link href="/terms" className="hover:text-ink">Terms</Link>
-          </div>
-        </footer>
+      <body className="min-h-dvh bg-paper text-ink">
+        {children}
+        <Analytics />
       </body>
     </html>
   );

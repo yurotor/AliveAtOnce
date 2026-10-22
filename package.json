@@ -9,7 +9,9 @@
     "lint": "eslint",
     "data:people": "tsx scripts/1-fetch-people.ts",
     "data:rank": "tsx scripts/2-pageviews.ts",
+    "data:relations": "tsx scripts/2b-relations.ts",
     "data:candidates": "tsx scripts/3-candidates.ts",
+    "data:photos": "tsx scripts/3b-photos.ts",
     "data:score": "tsx --env-file-if-exists=.env.local scripts/4-score-jev.ts",
     "data:write": "tsx --env-file-if-exists=.env.local scripts/5-write-claude.ts",
     "data:load": "tsx --env-file-if-exists=.env.local scripts/6-load-db.ts",
@@ -17,13 +19,17 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^7.0.148",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "sharp": "^0.35.5",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@ai-sdk/anthropic": "^4.0.85",
+    "@ai-sdk/typesafe-ai": "^3.0.24",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

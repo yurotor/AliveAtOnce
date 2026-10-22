@@ -53,7 +53,7 @@ type Fact = { key: string; bridge: string; early: string; late: string };
  * Pick the top `n` facts from an already-ranked list, with a diversity cap:
  * each bridge person once, and nobody as the early/late figure more than `maxPerEnd` times.
  */
-export function selectFacts<T extends Fact>(ranked: T[], n: number, maxPerEnd = 12): T[] {
+export function selectFacts<T extends Fact>(ranked: T[], n: number, maxPerEnd = 25): T[] {
   const uses = new Map<string, number>();
   const bridges = new Set<string>();
   const chosen: T[] = [];
@@ -66,4 +66,48 @@ export function selectFacts<T extends Fact>(ranked: T[], n: number, maxPerEnd = 
     chosen.push(c);
   }
   return chosen;
+}
+
+/** A Wikimedia Commons portrait, as resolved by step 3b. See src/lib/photo.ts. */
+export type { Photo } from "../src/lib/photo";
+
+/**
+ * Broad field from the Wikidata description: the keyword that appears first wins
+ * ("American businessman and inventor" → business). null = can't tell.
+ */
+const FIELDS: [string, RegExp][] = [
+  ["science", /\b(physicist|chemist|biologist|naturalist|mathematician|astronomer|scientist|geologist|physiologist|botanist|zoologist|geneticist|engineer|inventor|psychologist|psychoanalyst|neurologist|physician|astrophysicist|computer scientist)/],
+  ["thought", /\b(philosopher|theologian|pope|saint|prophet|religious|bishop|priest|monk|nun|reformer|cleric|economist|sociologist|historian)/],
+  ["power", /\b(politician|president|prime minister|statesman|king|queen|emperor|empress|monarch|ruler|sultan|pharaoh|tsar|czar|shah|caliph|revolutionary|dictator|general|admiral|military|marshal|first lady|prince|princess|duke|chancellor|senator|governor|consort|dynasty|leader)/],
+  ["literature", /\b(writer|poet|novelist|playwright|author|dramatist|essayist|journalist|lyricist)/],
+  ["art", /\b(painter|sculptor|artist|architect|photographer|illustrator|designer|cartoonist)/],
+  ["music", /\b(composer|singer|rapper|musician|pianist|songwriter|guitarist|band|conductor|violinist|drummer|dj|record producer)/],
+  ["screen", /\b(actor|actress|film|director|comedian|television|youtuber|model|presenter|entertainer|dancer|magician)/],
+  ["sport", /\b(footballer|football|basketball|tennis|boxer|athlete|cricketer|racing|golfer|swimmer|wrestler|cyclist|chess|skater|sprinter|baseball|hockey|martial art)/],
+  ["business", /\b(businessman|businesswoman|business|entrepreneur|industrialist|investor|banker|magnate|ceo|founder|executive)/],
+  ["exploration", /\b(explorer|navigator|astronaut|cosmonaut|aviator|pilot|mountaineer)/],
+];
+
+export function fieldOf(description: string): string | null {
+  const d = description.toLowerCase();
+  let best: string | null = null;
+  let at = Infinity;
+  for (const [field, re] of FIELDS) {
+    const i = d.search(re);
+    if (i >= 0 && i < at) { at = i; best = field; }
+  }
+  return best;
+}
+
+/** Middle of a life in decimal years (living people run to today). */
+export const midpoint = (p: Life) => (p.bLo + (p.dHi ?? new Date().getUTCFullYear())) / 2;
+
+export function slugify(s: string) {
+  return s
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
