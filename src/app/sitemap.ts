@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getFactIds, getSitemapPage } from "@/lib/db";
+import { getFactSlugs, getSitemapPage, COLLECTIONS } from "@/lib/db";
 import { SITE_URL } from "@/lib/present";
 
 const PEOPLE_PER_MAP = 10_000;
@@ -13,12 +13,14 @@ export async function generateSitemaps() {
 export default async function sitemap(props: { id: Promise<string> }): Promise<MetadataRoute.Sitemap> {
   const id = Number(await props.id);
   if (id === 0) {
-    const facts = await getFactIds();
+    const facts = await getFactSlugs();
     return [
       { url: SITE_URL, changeFrequency: "daily", priority: 1 },
       { url: `${SITE_URL}/search` },
       { url: `${SITE_URL}/about` },
-      ...facts.map((f) => ({ url: `${SITE_URL}/bridge/${f}` })),
+      { url: `${SITE_URL}/collections` },
+      ...COLLECTIONS.map((c) => ({ url: `${SITE_URL}/collections/${c.slug}` })),
+      ...facts.map((slug) => ({ url: `${SITE_URL}/b/${slug}` })),
     ];
   }
   const people = await getSitemapPage(id - 1, PEOPLE_PER_MAP);

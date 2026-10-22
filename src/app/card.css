@@ -1,0 +1,75 @@
+/* The bridge card is always dark: the portraits are the only strong colour. */
+.theme-dark {
+  --paper: #15172b;
+  --paper-2: #1d2038;
+  --ink: #e9eaf3;
+  --muted: #9ea1b8;
+  --rule: #34385a;
+  --past: #c2ae63;
+  --bridge: #7d89ff;
+  --future: #ff6b9d;
+  --focus: #7d89ff;
+  color-scheme: dark;
+}
+
+/*
+ * Lifeline: A's segment, then the bridge's starting just before A's ends, then
+ * B's just before the bridge's ends (~1.2s); then each overlap point pulses
+ * once with its year. Segments and marks carry --i (0, 1, 2).
+ */
+@keyframes ll-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes ll-appear {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ll-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgb(125 137 255 / 0.7); }
+  45% { transform: scale(1.6); box-shadow: 0 0 0 10px rgb(125 137 255 / 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgb(125 137 255 / 0); }
+}
+.ll-seg {
+  transform-origin: left center;
+  animation: ll-draw 460ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 370ms + 150ms);
+}
+.ll-mark {
+  animation: ll-appear 260ms ease-out both;
+  animation-delay: calc(var(--i) * 370ms + 520ms);
+}
+.ll-dot {
+  animation: ll-pulse 650ms ease-out both;
+  animation-delay: calc(var(--i) * 370ms + 560ms);
+}
+
+/* "how?" flip. */
+.flip { perspective: 1400px; }
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 400ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.flip-inner[data-flipped="true"] { transform: rotateY(180deg); }
+.flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-back { transform: rotateY(180deg); }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up { animation: fade-up 300ms ease-out both; }
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+.sheet-up { animation: sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (min-width: 640px) {
+  .sheet-up { animation: fade-up 180ms ease-out both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ll-seg, .ll-mark, .ll-dot, .fade-up, .sheet-up { animation: none; }
+  .flip-inner { transition: none; }
+}

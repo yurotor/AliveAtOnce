@@ -6,7 +6,7 @@ import { getFactsFor, getOverlaps, getPerson, getTopSlugs, type Person } from "@
 import { ageAt, currentYear } from "@/lib/life";
 import { lifeNote, lifeYears, personPath, thumb } from "@/lib/present";
 import { LifeChart, type TimelineRow } from "@/components/Timeline";
-import { FactList } from "@/components/FactView";
+import { FaceCard, FaceGrid } from "@/components/FaceCard";
 
 // Pages beyond the prerendered sample render fully on first visit (then cache) —
 // we want complete HTML for crawlers rather than a streamed skeleton.
@@ -78,7 +78,9 @@ export default async function PersonPage({ params }: PageProps<"/p/[slug]">) {
       {facts.length > 0 && (
         <section className="py-10 border-t border-rule">
           <h2 className="font-display text-3xl mb-6">Surprising overlaps</h2>
-          <FactList facts={facts} now={now} />
+          <FaceGrid>
+            {facts.map((f) => <FaceCard key={f.id} fact={f} />)}
+          </FaceGrid>
         </section>
       )}
 
