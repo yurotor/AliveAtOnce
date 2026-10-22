@@ -38,7 +38,8 @@ export const labelName = (p: Named) => p.name.replace(/,\s*\d+(st|nd|rd|th)\s.*$
 
 /** "Pablo Picasso caught Charles Darwin *and* Eminem." */
 export function templateHeadline(bridge: Named, early: Named, late: Named) {
-  const line = `${shortName(bridge)} caught ${shortName(early)} *and* ${shortName(late)}.`;
+  const last = shortName(late);
+  const line = `${shortName(bridge)} caught ${shortName(early)} *and* ${last}${last.endsWith(".") ? "" : "."}`; // "King Jr."
   return line[0].toUpperCase() + line.slice(1); // "the Queen Mother" opens a sentence
 }
 
